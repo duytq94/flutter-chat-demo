@@ -1,8 +1,8 @@
 <component name="libraryTable">
-  <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
+  <library name="Flutter Plugins">
     <CLASSES>
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/firebase_auth-0.5.18" />
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/google_sign_in-3.0.4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/google_sign_in-3.0.4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/firebase_auth-0.5.18" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
