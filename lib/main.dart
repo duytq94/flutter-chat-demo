@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Main extends StatelessWidget {
   @override
@@ -114,8 +115,52 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  Widget buildItem(BuildContext context, DocumentSnapshot document) {
+    return FlatButton(
+        child: new Container(
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 50.0,
+                height: 50.0,
+                decoration: new BoxDecoration(
+                  image: new DecorationImage(
+                    image: NetworkImage(
+                      document['photoUrl'],
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+                ),
+              ),
+              Container(
+                child: Text(document['displayName']),
+                margin: EdgeInsets.only(left: 20.0),
+              ),
+            ],
+          ),
+        ),
+        onPressed: () {},
+        color: Colors.grey.withOpacity(0.3),
+        padding: new EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(child: new Center(), onWillPop: onWillPopScope);
+    return new WillPopScope(
+        child: new Container(
+          child: StreamBuilder(
+            stream: Firestore.instance.collection('users').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Text("Lodading...");
+              return ListView.builder(
+                padding: new EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                itemCount: snapshot.data.documents.length,
+              );
+            },
+          ),
+        ),
+        onWillPop: onWillPopScope);
   }
 }
