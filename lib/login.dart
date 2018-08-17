@@ -60,7 +60,7 @@ class LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
 
-      Navigator.push(context, new MaterialPageRoute(builder: (context) => new MainScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {

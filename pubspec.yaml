@@ -12,6 +12,7 @@ dependencies:
   google_sign_in: ^3.0.4
   cloud_firestore: ^0.7.4
   fluttertoast: ^2.0.7
+  image_picker: ^0.4.6
 
 dev_dependencies:
   flutter_test:

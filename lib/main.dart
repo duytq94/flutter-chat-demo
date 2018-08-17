@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_demo/const.dart';
+import 'package:flutter_chat_demo/settings.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Choice {
@@ -34,12 +35,13 @@ class MainScreenState extends State<MainScreen> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 10.0),
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
                 margin: EdgeInsets.all(0.0),
                 padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+                height: 100.0,
                 child: Column(
                   children: <Widget>[
                     Container(
@@ -76,7 +78,7 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: Color(0xff203152)),
+                      style: TextStyle(color: primaryColor),
                     )
                   ],
                 ),
@@ -96,7 +98,7 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: Color(0xff203152)),
+                      style: TextStyle(color: primaryColor),
                     )
                   ],
                 ),
@@ -113,8 +115,8 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    return FlatButton(
-      child: Container(
+    return Container(
+      child: FlatButton(
         child: Row(
           children: <Widget>[
             Container(
@@ -136,11 +138,12 @@ class MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
+        onPressed: () {},
+        color: Colors.grey.withOpacity(0.1),
+        padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
-      onPressed: () {},
-      color: Colors.grey.withOpacity(0.1),
-      padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      margin: EdgeInsets.only(bottom: 10.0),
     );
   }
 
@@ -150,7 +153,7 @@ class MainScreenState extends State<MainScreen> {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
-      // Go to settings screen
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
     }
   }
 
@@ -192,7 +195,7 @@ class MainScreenState extends State<MainScreen> {
                         ),
                         Text(
                           choice.title,
-                          style: TextStyle(color: Color(0xff203152)),
+                          style: TextStyle(color: primaryColor),
                         ),
                       ],
                     ));
@@ -202,18 +205,37 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       body: WillPopScope(
-          child: new Container(
-            child: StreamBuilder(
-              stream: Firestore.instance.collection('users').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Text("Lodading...");
-                return ListView.builder(
-                  padding: EdgeInsets.all(10.0),
-                  itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                  itemCount: snapshot.data.documents.length,
-                );
-              },
-            ),
+          child: Stack(
+            children: <Widget>[
+              // List
+              Container(
+                child: StreamBuilder(
+                  stream: Firestore.instance.collection('users').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      return ListView.builder(
+                        padding: EdgeInsets.all(10.0),
+                        itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                        itemCount: snapshot.data.documents.length,
+                      );
+                    }
+                  },
+                ),
+              ),
+
+              // Loading
+              Positioned(
+                  child: isLoading
+                      ? Container(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          color: Colors.white.withOpacity(0.8),
+                        )
+                      : Container())
+            ],
           ),
           onWillPop: onWillPopScope),
     );
