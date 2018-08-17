@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_chat_demo/const.dart';
 import 'package:flutter_chat_demo/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,16 +12,13 @@ void main() => runApp(new MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Chat Demo',
       theme: new ThemeData(
-        primaryColor: new Color(0xfff5a623),
+        primaryColor: themeColor,
       ),
-      home: new LoginScreen(title: 'CHAT DEMO'),
+      home: LoginScreen(title: 'CHAT DEMO'),
       debugShowCheckedModeBanner: false,
-      routes: <String, WidgetBuilder>{
-        '/main': (_) => new Main(), // Home Page
-      },
     );
   }
 }
@@ -62,8 +60,7 @@ class LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
 
-      // Navigate and reset route
-      Navigator.of(context).pushNamedAndRemoveUntil('/main', (Route<dynamic> route) => false);
+      Navigator.push(context, new MaterialPageRoute(builder: (context) => new MainScreen()));
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
@@ -74,38 +71,37 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text(
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(
             widget.title,
-            style: new TextStyle(color: new Color(0xff203152), fontWeight: FontWeight.bold),
+            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
-          backgroundColor: new Color(0xfff5a623),
         ),
-        body: new Stack(
+        body: Stack(
           children: <Widget>[
-            new Center(
-              child: new FlatButton(
+            Center(
+              child: FlatButton(
                   onPressed: handleSignIn,
-                  child: new Text(
+                  child: Text(
                     'SIGN IN WITH GOOGLE',
-                    style: new TextStyle(fontSize: 16.0),
+                    style: TextStyle(fontSize: 16.0),
                   ),
-                  color: new Color(0xffdd4b39),
-                  highlightColor: new Color(0xffff7f7f),
+                  color: Color(0xffdd4b39),
+                  highlightColor: Color(0xffff7f7f),
                   textColor: Colors.white,
-                  padding: new EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
+                  padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
             ),
-            new Positioned(
+            Positioned(
                 child: isLoading
                     ? Container(
-                        child: new Center(
-                          child: new CircularProgressIndicator(),
+                        child: Center(
+                          child: CircularProgressIndicator(),
                         ),
                         color: Colors.white.withOpacity(0.8),
                       )
-                    : new Container())
+                    : Container())
           ],
         ));
   }

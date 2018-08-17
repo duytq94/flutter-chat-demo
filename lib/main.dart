@@ -2,21 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_chat_demo/const.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class Main extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(
-          'MAIN',
-          style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: new MainScreen(),
-    );
-  }
+class Choice {
+  const Choice({this.title, this.icon});
+
+  final String title;
+  final IconData icon;
 }
 
 class MainScreen extends StatefulWidget {
@@ -26,6 +19,10 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   bool isLoading = false;
+  List<Choice> choices = const <Choice>[
+    const Choice(title: 'Settings', icon: Icons.settings),
+    const Choice(title: 'Log out', icon: Icons.exit_to_app),
+  ];
 
   Future<bool> onWillPopScope() {
     openDialog();
@@ -36,70 +33,70 @@ class MainScreenState extends State<MainScreen> {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return new SimpleDialog(
-            contentPadding: new EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 10.0),
+          return SimpleDialog(
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 10.0),
             children: <Widget>[
-              new Container(
-                color: new Color(0xfff5a623),
-                margin: new EdgeInsets.all(0.0),
-                padding: new EdgeInsets.only(bottom: 10.0, top: 10.0),
-                child: new Column(
+              Container(
+                color: themeColor,
+                margin: EdgeInsets.all(0.0),
+                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+                child: Column(
                   children: <Widget>[
-                    new Container(
-                      child: new Icon(
+                    Container(
+                      child: Icon(
                         Icons.exit_to_app,
                         size: 30.0,
                         color: Colors.white,
                       ),
-                      margin: new EdgeInsets.only(bottom: 10.0),
+                      margin: EdgeInsets.only(bottom: 10.0),
                     ),
-                    new Text(
+                    Text(
                       'Exit app',
-                      style: new TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
-                    new Text(
+                    Text(
                       'Are you sure to exit app?',
-                      style: new TextStyle(color: Colors.white70, fontSize: 14.0),
+                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
                     ),
                   ],
                 ),
               ),
-              new SimpleDialogOption(
+              SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context, 0);
                 },
-                child: new Row(
+                child: Row(
                   children: <Widget>[
-                    new Container(
-                      child: new Icon(
+                    Container(
+                      child: Icon(
                         Icons.cancel,
-                        color: new Color(0xff203152),
+                        color: primaryColor,
                       ),
-                      margin: new EdgeInsets.only(right: 20.0),
+                      margin: EdgeInsets.only(right: 20.0),
                     ),
-                    new Text(
+                    Text(
                       'CANCEL',
-                      style: new TextStyle(color: new Color(0xff203152), fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Color(0xff203152)),
                     )
                   ],
                 ),
               ),
-              new SimpleDialogOption(
+              SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context, 1);
                 },
-                child: new Row(
+                child: Row(
                   children: <Widget>[
-                    new Container(
-                      child: new Icon(
+                    Container(
+                      child: Icon(
                         Icons.check_circle,
-                        color: new Color(0xff203152),
+                        color: primaryColor,
                       ),
-                      margin: new EdgeInsets.only(right: 20.0),
+                      margin: EdgeInsets.only(right: 20.0),
                     ),
-                    new Text(
+                    Text(
                       'YES',
-                      style: new TextStyle(color: new Color(0xff203152), fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Color(0xff203152)),
                     )
                   ],
                 ),
@@ -117,50 +114,108 @@ class MainScreenState extends State<MainScreen> {
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
     return FlatButton(
-        child: new Container(
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 50.0,
-                height: 50.0,
-                decoration: new BoxDecoration(
-                  image: new DecorationImage(
-                    image: NetworkImage(
-                      document['photoUrl'],
-                    ),
-                    fit: BoxFit.cover,
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 50.0,
+              height: 50.0,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(
+                    document['photoUrl'],
                   ),
-                  borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+                  fit: BoxFit.cover,
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(50.0)),
               ),
-              Container(
-                child: Text(document['displayName']),
-                margin: EdgeInsets.only(left: 20.0),
-              ),
-            ],
-          ),
+            ),
+            Container(
+              child: Text(document['displayName']),
+              margin: EdgeInsets.only(left: 20.0),
+            ),
+          ],
         ),
-        onPressed: () {},
-        color: Colors.grey.withOpacity(0.3),
-        padding: new EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0));
+      ),
+      onPressed: () {},
+      color: Colors.grey.withOpacity(0.1),
+      padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+    );
+  }
+
+  final GoogleSignIn googleSignIn = new GoogleSignIn();
+
+  void onItemMenuPress(Choice choice) {
+    if (choice.title == 'Log out') {
+      handleSignOut();
+    } else {
+      // Go to settings screen
+    }
+  }
+
+  Future<Null> handleSignOut() async {
+    this.setState(() {
+      isLoading = true;
+    });
+    await googleSignIn.signOut();
+    this.setState(() {
+      isLoading = false;
+    });
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(
-        child: new Container(
-          child: StreamBuilder(
-            stream: Firestore.instance.collection('users').snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Text("Lodading...");
-              return ListView.builder(
-                padding: new EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                itemCount: snapshot.data.documents.length,
-              );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'MAIN',
+          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: <Widget>[
+          PopupMenuButton<Choice>(
+            onSelected: onItemMenuPress,
+            itemBuilder: (BuildContext context) {
+              return choices.map((Choice choice) {
+                return PopupMenuItem<Choice>(
+                    value: choice,
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          choice.icon,
+                          color: primaryColor,
+                        ),
+                        Container(
+                          width: 10.0,
+                        ),
+                        Text(
+                          choice.title,
+                          style: TextStyle(color: Color(0xff203152)),
+                        ),
+                      ],
+                    ));
+              }).toList();
             },
           ),
-        ),
-        onWillPop: onWillPopScope);
+        ],
+      ),
+      body: WillPopScope(
+          child: new Container(
+            child: StreamBuilder(
+              stream: Firestore.instance.collection('users').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Text("Lodading...");
+                return ListView.builder(
+                  padding: EdgeInsets.all(10.0),
+                  itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                  itemCount: snapshot.data.documents.length,
+                );
+              },
+            ),
+          ),
+          onWillPop: onWillPopScope),
+    );
   }
 }
