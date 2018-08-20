@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_demo/const.dart';
 import 'package:flutter_chat_demo/settings.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_chat_demo/chat.dart';
 
 class Choice {
   const Choice({this.title, this.icon});
@@ -133,12 +134,14 @@ class MainScreenState extends State<MainScreen> {
               ),
             ),
             Container(
-              child: Text(document['displayName']),
+              child: Text(document['nickname']),
               margin: EdgeInsets.only(left: 20.0),
             ),
           ],
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat()));
+        },
         color: Colors.grey.withOpacity(0.1),
         padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),

@@ -6,6 +6,7 @@ import 'package:flutter_chat_demo/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(new MyApp());
 
@@ -35,38 +36,57 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final GoogleSignIn googleSignIn = new GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  SharedPreferences prefs;
 
   bool isLoading = false;
+  FirebaseUser currentUser;
 
   Future<Null> handleSignIn() async {
-    this.setState(() {
-      isLoading = true;
-    });
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
-    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    FirebaseUser firebaseUser = await firebaseAuth.signInWithGoogle(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    if (firebaseUser != null) {
-      // Update data to server
-      Firestore.instance
-          .collection('users')
-          .document(firebaseUser.uid)
-          .setData({'displayName': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl});
+    prefs = await SharedPreferences.getInstance();
 
-      Fluttertoast.showToast(msg: "Sign in success");
-      this.setState(() {
-        isLoading = false;
-      });
-
+    if (prefs.getString('id') != null) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
     } else {
-      Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
-        isLoading = false;
+        isLoading = true;
       });
+
+      GoogleSignInAccount googleUser = await googleSignIn.signIn();
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      FirebaseUser firebaseUser = await firebaseAuth.signInWithGoogle(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      if (firebaseUser != null) {
+        // Update data to local
+        currentUser = firebaseUser;
+        saveLocal();
+
+        // Update data to server
+        Firestore.instance
+            .collection('users')
+            .document(firebaseUser.uid)
+            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl});
+
+        Fluttertoast.showToast(msg: "Sign in success");
+        this.setState(() {
+          isLoading = false;
+        });
+
+        Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
+      } else {
+        Fluttertoast.showToast(msg: "Sign in fail");
+        this.setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
+
+  void saveLocal() async {
+    await prefs.setString('id', currentUser.uid);
+    await prefs.setString('nickname', currentUser.displayName);
+    await prefs.setString('photoUrl', currentUser.photoUrl);
   }
 
   @override
@@ -90,6 +110,7 @@ class LoginScreenState extends State<LoginScreen> {
                   ),
                   color: Color(0xffdd4b39),
                   highlightColor: Color(0xffff7f7f),
+                  splashColor: Colors.transparent,
                   textColor: Colors.white,
                   padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
             ),
