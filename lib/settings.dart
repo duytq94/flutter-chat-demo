@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_demo/const.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,6 +41,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   String id = '';
   String nickname = '';
   String aboutMe = '';
+  String photoUrl = '';
 
   bool isLoading = false;
   File avatarImageFile;
@@ -52,6 +56,7 @@ class SettingsScreenState extends State<SettingsScreen> {
     id = prefs.getString('id') ?? '';
     nickname = prefs.getString('nickname') ?? '';
     aboutMe = prefs.getString('aboutMe') ?? '';
+    photoUrl = prefs.getString('photoUrl') ?? '';
 
     controllerNickname = new TextEditingController(text: nickname);
     controllerAboutMe = new TextEditingController(text: aboutMe);
@@ -66,15 +71,55 @@ class SettingsScreenState extends State<SettingsScreen> {
     if (image != null) {
       setState(() {
         avatarImageFile = image;
+        isLoading = true;
       });
     }
+    uploadFile();
+  }
+
+  Future uploadFile() async {
+    final ByteData bytes = await rootBundle.load(avatarImageFile.path);
+    final Directory tempDir = Directory.systemTemp;
+    final String fileName = id;
+    final File file = File('${tempDir.path}/$fileName');
+    file.writeAsBytes(bytes.buffer.asInt8List(), mode: FileMode.write);
+
+    final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
+    final StorageUploadTask task = ref.putFile(file);
+    final Uri downloadUrl = (await task.future).downloadUrl;
+    photoUrl = downloadUrl.toString();
+
+    Firestore.instance
+        .collection('users')
+        .document(id)
+        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
+    await prefs.setString('photoUrl', photoUrl);
+    setState(() {
+      isLoading = false;
+    });
+
+    Fluttertoast.showToast(msg: "Upload success");
   }
 
   void handleUpdateData() async {
-    Firestore.instance.collection('users').document(id).updateData({'nickname': nickname, 'aboutMe': aboutMe});
+    setState(() {
+      isLoading = true;
+    });
+
+    Firestore.instance
+        .collection('users')
+        .document(id)
+        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
 
     await prefs.setString('nickname', nickname);
     await prefs.setString('aboutMe', aboutMe);
+    await prefs.setString('photoUrl', photoUrl);
+
+    setState(() {
+      isLoading = false;
+    });
+
+    Fluttertoast.showToast(msg: "Update success");
   }
 
   @override
@@ -90,11 +135,21 @@ class SettingsScreenState extends State<SettingsScreen> {
                   child: Stack(
                     children: <Widget>[
                       (avatarImageFile == null)
-                          ? Icon(
-                              Icons.account_circle,
-                              size: 90.0,
-                              color: greyColor,
-                            )
+                          ? (photoUrl != ''
+                              ? Material(
+                                  child: Image.network(
+                                    photoUrl,
+                                    width: 90.0,
+                                    height: 90.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                                )
+                              : Icon(
+                                  Icons.account_circle,
+                                  size: 90.0,
+                                  color: greyColor,
+                                ))
                           : Material(
                               child: Image.file(
                                 avatarImageFile,
@@ -107,7 +162,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       IconButton(
                         icon: Icon(
                           Icons.camera_alt,
-                          color: primaryColor,
+                          color: primaryColor.withOpacity(0.5),
                         ),
                         onPressed: getImage,
                         padding: EdgeInsets.all(30.0),
@@ -199,7 +254,19 @@ class SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           padding: EdgeInsets.only(left: 15.0, right: 15.0),
-        )
+        ),
+
+        // Loading
+        Positioned(
+          child: isLoading
+              ? Container(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  color: Colors.white.withOpacity(0.8),
+                )
+              : Container(),
+        ),
       ],
     );
   }

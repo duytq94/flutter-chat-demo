@@ -114,15 +114,18 @@ class LoginScreenState extends State<LoginScreen> {
                   textColor: Colors.white,
                   padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
             ),
+
+            // Loading
             Positioned(
-                child: isLoading
-                    ? Container(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        color: Colors.white.withOpacity(0.8),
-                      )
-                    : Container())
+              child: isLoading
+                  ? Container(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      color: Colors.white.withOpacity(0.8),
+                    )
+                  : Container(),
+            ),
           ],
         ));
   }
