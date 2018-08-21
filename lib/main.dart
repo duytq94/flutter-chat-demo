@@ -7,13 +7,6 @@ import 'package:flutter_chat_demo/settings.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_chat_demo/chat.dart';
 
-class Choice {
-  const Choice({this.title, this.icon});
-
-  final String title;
-  final IconData icon;
-}
-
 class MainScreen extends StatefulWidget {
   @override
   State createState() => new MainScreenState();
@@ -140,7 +133,13 @@ class MainScreenState extends State<MainScreen> {
           ],
         ),
         onPressed: () {
-          Navigator.push(context, new MaterialPageRoute(builder: (context) => new Chat()));
+          Navigator.push(
+              context,
+              new MaterialPageRoute(
+                  builder: (context) => new Chat(
+                        peerId: document.documentID,
+                        peerAvatar: document['photoUrl'],
+                      )));
         },
         color: Colors.grey.withOpacity(0.1),
         padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
@@ -208,39 +207,48 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       body: WillPopScope(
-          child: Stack(
-            children: <Widget>[
-              // List
-              Container(
-                child: StreamBuilder(
-                  stream: Firestore.instance.collection('users').snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
-                    } else {
-                      return ListView.builder(
-                        padding: EdgeInsets.all(10.0),
-                        itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                        itemCount: snapshot.data.documents.length,
-                      );
-                    }
-                  },
-                ),
+        child: Stack(
+          children: <Widget>[
+            // List
+            Container(
+              child: StreamBuilder(
+                stream: Firestore.instance.collection('users').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    return ListView.builder(
+                      padding: EdgeInsets.all(10.0),
+                      itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                      itemCount: snapshot.data.documents.length,
+                    );
+                  }
+                },
               ),
+            ),
 
-              // Loading
-              Positioned(
-                  child: isLoading
-                      ? Container(
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          color: Colors.white.withOpacity(0.8),
-                        )
-                      : Container())
-            ],
-          ),
-          onWillPop: onWillPopScope),
+            // Loading
+            Positioned(
+              child: isLoading
+                  ? Container(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      color: Colors.white.withOpacity(0.8),
+                    )
+                  : Container(),
+            )
+          ],
+        ),
+        onWillPop: onWillPopScope,
+      ),
     );
   }
+}
+
+class Choice {
+  const Choice({this.title, this.icon});
+
+  final String title;
+  final IconData icon;
 }

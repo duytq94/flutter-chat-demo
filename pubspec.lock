@@ -92,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.5"
+  firebase_database:
+    dependency: "direct main"
+    description:
+      name: firebase_database
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.4"
   firebase_storage:
     dependency: "direct main"
     description:
@@ -423,5 +430,5 @@ packages:
     source: hosted
     version: "2.1.13"
 sdks:
-  dart: ">=2.0.0-dev.52.0 <=2.0.0-dev.54.0.flutter-46ab040e58"
+  dart: ">=2.0.0-dev.52.0 <=2.0.0-dev.58.0.flutter-f981f09760"
   flutter: ">=0.2.4 <2.0.0"
