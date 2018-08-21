@@ -55,6 +55,7 @@ class ChatScreenState extends State<ChatScreen> {
   SharedPreferences prefs;
 
   final TextEditingController textEditingController = new TextEditingController();
+  final ScrollController listScrollController = new ScrollController();
 
   @override
   void initState() {
@@ -110,6 +111,7 @@ class ChatScreenState extends State<ChatScreen> {
           },
         );
       });
+      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }
@@ -179,6 +181,8 @@ class ChatScreenState extends State<ChatScreen> {
                       .collection('messages')
                       .document(groupChatId)
                       .collection(groupChatId)
+                      .orderBy('timestamp', descending: true)
+                      .limit(20)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
@@ -188,6 +192,8 @@ class ChatScreenState extends State<ChatScreen> {
                         padding: EdgeInsets.all(10.0),
                         itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
                         itemCount: snapshot.data.documents.length,
+                        reverse: true,
+                        controller: listScrollController,
                       );
                     }
                   },

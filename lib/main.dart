@@ -68,11 +68,11 @@ class MainScreenState extends State<MainScreen> {
                         Icons.cancel,
                         color: primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 20.0),
+                      margin: EdgeInsets.only(right: 10.0),
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: primaryColor),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -88,11 +88,11 @@ class MainScreenState extends State<MainScreen> {
                         Icons.check_circle,
                         color: primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 20.0),
+                      margin: EdgeInsets.only(right: 10.0),
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: primaryColor),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),

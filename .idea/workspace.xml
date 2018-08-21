@@ -6,15 +6,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="277a6769-8f6e-44b8-b826-06e3c3968ed3" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/lib/chat.dart" afterPath="$PROJECT_DIR$/lib/chat.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/const.dart" afterPath="$PROJECT_DIR$/lib/const.dart" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" afterPath="$PROJECT_DIR$/lib/main.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/settings.dart" afterPath="$PROJECT_DIR$/lib/settings.dart" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" afterPath="$PROJECT_DIR$/pubspec.lock" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" afterPath="$PROJECT_DIR$/pubspec.yaml" />
     </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
@@ -32,23 +26,27 @@
       <file leaf-file-name="chat.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/chat.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="177">
-              <caret line="181" column="35" lean-forward="true" selection-start-line="181" selection-start-column="35" selection-end-line="181" selection-end-column="35" />
+            <state relative-caret-position="397">
+              <caret line="188" column="72" lean-forward="true" selection-start-line="188" selection-start-column="72" selection-end-line="188" selection-end-column="72" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
-                <marker date="1534841405592" expanded="true" signature="2033:2390" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="login.dart" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/login.dart">
+      <file leaf-file-name="main.dart" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="639">
-              <caret line="70" column="0" lean-forward="false" selection-start-line="70" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+            <state relative-caret-position="155">
+              <caret line="209" column="21" lean-forward="true" selection-start-line="209" selection-start-column="21" selection-end-line="209" selection-end-column="21" />
               <folding>
-                <element signature="e#2799#3993#0" expanded="false" />
+                <element signature="e#371#434#0" expanded="false" />
+                <element signature="e#569#610#0" expanded="false" />
+                <element signature="e#628#671#0" expanded="false" />
+                <element signature="e#711#770#0" expanded="false" />
+                <element signature="e#758#765#0" expanded="false" />
+                <element signature="e#7719#7809#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -130,8 +128,8 @@
         <option value="$PROJECT_DIR$/pubspec.yaml" />
         <option value="$PROJECT_DIR$/lib/settings.dart" />
         <option value="$PROJECT_DIR$/lib/login.dart" />
-        <option value="$PROJECT_DIR$/lib/main.dart" />
         <option value="$PROJECT_DIR$/lib/const.dart" />
+        <option value="$PROJECT_DIR$/lib/main.dart" />
         <option value="$PROJECT_DIR$/lib/chat.dart" />
       </list>
     </option>
@@ -407,7 +405,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -418,7 +415,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -485,7 +481,6 @@
         <state relative-caret-position="155">
           <caret line="43" column="3" lean-forward="true" selection-start-line="43" selection-start-column="3" selection-end-line="43" selection-end-column="3" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -510,7 +505,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -535,7 +529,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -546,7 +539,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -564,7 +556,6 @@
         <state relative-caret-position="375">
           <caret line="29" column="1" lean-forward="false" selection-start-line="29" selection-start-column="1" selection-end-line="29" selection-end-column="1" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -582,7 +573,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -600,7 +590,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -618,7 +607,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#20#0" expanded="false" />
             <element signature="e#2799#3993#0" expanded="false" />
           </folding>
         </state>
@@ -743,7 +731,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="152">
           <caret line="7" column="68" lean-forward="false" selection-start-line="7" selection-start-column="68" selection-end-line="7" selection-end-column="68" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -755,27 +742,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/main.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="485">
-          <caret line="132" column="12" lean-forward="true" selection-start-line="132" selection-start-column="12" selection-end-line="132" selection-end-column="12" />
-          <folding>
-            <element signature="e#371#434#0" expanded="false" />
-            <element signature="e#569#610#0" expanded="false" />
-            <element signature="e#628#671#0" expanded="false" />
-            <element signature="e#711#770#0" expanded="false" />
-            <element signature="e#758#765#0" expanded="false" />
-            <element signature="e#800#3487#0" expanded="false" />
-            <element signature="e#7661#7751#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/const.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="110">
           <caret line="5" column="16" lean-forward="false" selection-start-line="5" selection-start-column="6" selection-end-line="5" selection-end-column="16" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -789,13 +759,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/main.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="155">
+          <caret line="209" column="21" lean-forward="true" selection-start-line="209" selection-start-column="21" selection-end-line="209" selection-end-column="21" />
+          <folding>
+            <element signature="e#371#434#0" expanded="false" />
+            <element signature="e#569#610#0" expanded="false" />
+            <element signature="e#628#671#0" expanded="false" />
+            <element signature="e#711#770#0" expanded="false" />
+            <element signature="e#758#765#0" expanded="false" />
+            <element signature="e#7719#7809#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/chat.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="181" column="35" lean-forward="true" selection-start-line="181" selection-start-column="35" selection-end-line="181" selection-end-column="35" />
+        <state relative-caret-position="397">
+          <caret line="188" column="72" lean-forward="true" selection-start-line="188" selection-start-column="72" selection-end-line="188" selection-end-column="72" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
-            <marker date="1534841405592" expanded="true" signature="2033:2390" ph="..." />
           </folding>
         </state>
       </provider>
