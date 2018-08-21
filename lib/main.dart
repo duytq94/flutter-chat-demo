@@ -8,11 +8,19 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_chat_demo/chat.dart';
 
 class MainScreen extends StatefulWidget {
+  final String currentUserId;
+
+  MainScreen({Key key, @required this.currentUserId}) : super(key: key);
+
   @override
-  State createState() => new MainScreenState();
+  State createState() => new MainScreenState(currentUserId: currentUserId);
 }
 
 class MainScreenState extends State<MainScreen> {
+  MainScreenState({Key key, @required this.currentUserId});
+
+  final String currentUserId;
+
   bool isLoading = false;
   List<Choice> choices = const <Choice>[
     const Choice(title: 'Settings', icon: Icons.settings),
@@ -109,44 +117,49 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    return Container(
-      child: FlatButton(
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: 50.0,
-              height: 50.0,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                    document['photoUrl'],
+    print(currentUserId);
+    if (document['id'] == currentUserId) {
+      return Container();
+    } else {
+      return Container(
+        child: FlatButton(
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 50.0,
+                height: 50.0,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      document['photoUrl'],
+                    ),
+                    fit: BoxFit.cover,
                   ),
-                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.all(Radius.circular(50.0)),
                 ),
-                borderRadius: BorderRadius.all(Radius.circular(50.0)),
               ),
-            ),
-            Container(
-              child: Text(document['nickname']),
-              margin: EdgeInsets.only(left: 20.0),
-            ),
-          ],
+              Container(
+                child: Text(document['nickname']),
+                margin: EdgeInsets.only(left: 20.0),
+              ),
+            ],
+          ),
+          onPressed: () {
+            Navigator.push(
+                context,
+                new MaterialPageRoute(
+                    builder: (context) => new Chat(
+                          peerId: document.documentID,
+                          peerAvatar: document['photoUrl'],
+                        )));
+          },
+          color: Colors.grey.withOpacity(0.1),
+          padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
-        onPressed: () {
-          Navigator.push(
-              context,
-              new MaterialPageRoute(
-                  builder: (context) => new Chat(
-                        peerId: document.documentID,
-                        peerAvatar: document['photoUrl'],
-                      )));
-        },
-        color: Colors.grey.withOpacity(0.1),
-        padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      ),
-      margin: EdgeInsets.only(bottom: 10.0),
-    );
+        margin: EdgeInsets.only(bottom: 10.0),
+      );
+    }
   }
 
   final GoogleSignIn googleSignIn = new GoogleSignIn();

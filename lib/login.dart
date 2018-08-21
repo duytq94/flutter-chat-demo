@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/const.dart';
 import 'package:flutter_chat_demo/main.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(new MyApp());
@@ -45,7 +46,13 @@ class LoginScreenState extends State<LoginScreen> {
     prefs = await SharedPreferences.getInstance();
 
     if (prefs.getString('id') != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MainScreen(
+                  currentUserId: prefs.getString('id'),
+                )),
+      );
     } else {
       this.setState(() {
         isLoading = true;
@@ -66,14 +73,20 @@ class LoginScreenState extends State<LoginScreen> {
         Firestore.instance
             .collection('users')
             .document(firebaseUser.uid)
-            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl});
+            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
 
         Fluttertoast.showToast(msg: "Sign in success");
         this.setState(() {
           isLoading = false;
         });
 
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MainScreen(
+                    currentUserId: firebaseUser.uid,
+                  )),
+        );
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
         this.setState(() {

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_demo/const.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Chat extends StatelessWidget {
@@ -54,6 +56,10 @@ class ChatScreenState extends State<ChatScreen> {
   String groupChatId;
   SharedPreferences prefs;
 
+  File imageFile;
+  bool isLoading;
+  String imageUrl;
+
   final TextEditingController textEditingController = new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
 
@@ -63,6 +69,9 @@ class ChatScreenState extends State<ChatScreen> {
 
     groupChatId = '';
     isTyping = false;
+
+    isLoading = false;
+    imageUrl = '';
 
     readLocal();
   }
@@ -77,20 +86,41 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     setState(() {});
-
-//    Firestore.instance.collection('messages').document(groupChatId).collection(groupChatId).document('${DateTime
-//        .now()
-//        .millisecondsSinceEpoch}').setData({
-//      'idFrom': id,
-//      'idTo': peerId,
-//      'timestamp': '${DateTime
-//          .now()
-//          .millisecondsSinceEpoch}',
-//      'content': 'How are you',
-//    });
   }
 
-  void onSendMessage(String content) {
+  Future getImage() async {
+    File image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        imageFile = image;
+        isLoading = true;
+      });
+    }
+    uploadFile();
+  }
+
+  Future uploadFile() async {
+    final ByteData bytes = await rootBundle.load(imageFile.path);
+    final Directory tempDir = Directory.systemTemp;
+    final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    final File file = File('${tempDir.path}/$fileName');
+    file.writeAsBytes(bytes.buffer.asInt8List(), mode: FileMode.write);
+
+    final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
+    final StorageUploadTask task = ref.putFile(file);
+    final Uri downloadUrl = (await task.future).downloadUrl;
+    imageUrl = downloadUrl.toString();
+
+    setState(() {
+      isLoading = false;
+    });
+
+    onSendMessage(imageUrl, 1);
+  }
+
+  void onSendMessage(String content, int type) {
+    // type: 0 = text, 1 = image
     if (content.trim() != '') {
       textEditingController.clear();
 
@@ -108,6 +138,7 @@ class ChatScreenState extends State<ChatScreen> {
             'idTo': peerId,
             'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
             'content': content,
+            'type': type
           },
         );
       });
@@ -119,24 +150,39 @@ class ChatScreenState extends State<ChatScreen> {
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
     if (document['idFrom'] == id) {
-      // Right
+      // Right (my message)
       return Row(
         children: <Widget>[
-          Container(
-            child: Text(
-              document['content'],
-              style: TextStyle(color: primaryColor),
-            ),
-            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-            width: 200.0,
-            decoration: BoxDecoration(color: greyColor2, borderRadius: BorderRadius.circular(8.0)),
-            margin: EdgeInsets.only(bottom: 15.0),
-          ),
+          document['type'] == 0
+              ? Container(
+                  child: Text(
+                    document['content'],
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                  width: 200.0,
+                  decoration: BoxDecoration(color: greyColor2, borderRadius: BorderRadius.circular(8.0)),
+                  margin: EdgeInsets.only(bottom: 15.0),
+                )
+              : Container(
+                  child: Material(
+                    child: Image.network(
+                      document['content'],
+                      width: 200.0,
+                      height: 200.0,
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(8.0),
+                    ),
+                  ),
+                  margin: EdgeInsets.only(bottom: 15.0),
+                ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
     } else {
-      // Left
+      // Left (peer message)
       return Container(
         child: Row(
           children: <Widget>[
@@ -151,16 +197,31 @@ class ChatScreenState extends State<ChatScreen> {
                 Radius.circular(18.0),
               ),
             ),
-            Container(
-              child: Text(
-                document['content'],
-                style: TextStyle(color: Colors.white),
-              ),
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              width: 200.0,
-              decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(left: 10.0),
-            ),
+            document['type'] == 0
+                ? Container(
+                    child: Text(
+                      document['content'],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                    width: 200.0,
+                    decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(8.0)),
+                    margin: EdgeInsets.only(left: 10.0),
+                  )
+                : Container(
+                    child: Material(
+                      child: Image.network(
+                        document['content'],
+                        width: 200.0,
+                        height: 200.0,
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(8.0),
+                      ),
+                    ),
+                    margin: EdgeInsets.only(left: 10.0),
+                  ),
           ],
         ),
         margin: EdgeInsets.only(bottom: 15.0),
@@ -170,70 +231,101 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      // List of messages
+    return Stack(
       children: <Widget>[
-        Flexible(
-          child: groupChatId == ''
-              ? Center(child: CircularProgressIndicator())
-              : StreamBuilder(
-                  stream: Firestore.instance
-                      .collection('messages')
-                      .document(groupChatId)
-                      .collection(groupChatId)
-                      .orderBy('timestamp', descending: true)
-                      .limit(20)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
-                    } else {
-                      return ListView.builder(
-                        padding: EdgeInsets.all(10.0),
-                        itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                        itemCount: snapshot.data.documents.length,
-                        reverse: true,
-                        controller: listScrollController,
-                      );
-                    }
-                  },
-                ),
-        ),
+        Column(
+          // List of messages
+          children: <Widget>[
+            Flexible(
+              child: groupChatId == ''
+                  ? Center(child: CircularProgressIndicator())
+                  : StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('messages')
+                          .document(groupChatId)
+                          .collection(groupChatId)
+                          .orderBy('timestamp', descending: true)
+                          .limit(20)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
+                          return ListView.builder(
+                            padding: EdgeInsets.all(10.0),
+                            itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                            itemCount: snapshot.data.documents.length,
+                            reverse: true,
+                            controller: listScrollController,
+                          );
+                        }
+                      },
+                    ),
+            ),
 
-        // Input content
-        Container(
-          child: Row(
-            children: <Widget>[
-              Flexible(
-                child: Container(
-                  child: TextField(
-                    style: TextStyle(color: primaryColor, fontSize: 15.0),
-                    controller: textEditingController,
-                    decoration: InputDecoration.collapsed(
-                      hintText: 'Type your message...',
-                      hintStyle: TextStyle(color: greyColor),
+            // Input content
+            Container(
+              child: Row(
+                children: <Widget>[
+                  // Button send image
+                  Material(
+                    child: new Container(
+                      margin: new EdgeInsets.symmetric(horizontal: 8.0),
+                      child: new IconButton(
+                        icon: new Icon(Icons.image),
+                        onPressed: getImage,
+                        color: primaryColor,
+                      ),
+                    ),
+                    color: greyColor2,
+                  ),
+
+                  // Edit text
+                  Flexible(
+                    child: Container(
+                      child: TextField(
+                        style: TextStyle(color: primaryColor, fontSize: 15.0),
+                        controller: textEditingController,
+                        decoration: InputDecoration.collapsed(
+                          hintText: 'Type your message...',
+                          hintStyle: TextStyle(color: greyColor),
+                        ),
+                      ),
                     ),
                   ),
-                  margin: EdgeInsets.only(left: 15.0, right: 10.0),
-                ),
-              ),
-              Material(
-                child: new Container(
-                  margin: new EdgeInsets.symmetric(horizontal: 8.0),
-                  child: new IconButton(
-                    icon: new Icon(Icons.send),
-                    onPressed: () => onSendMessage(textEditingController.text),
-                    color: primaryColor,
+
+                  // Button send message
+                  Material(
+                    child: new Container(
+                      margin: new EdgeInsets.symmetric(horizontal: 8.0),
+                      child: new IconButton(
+                        icon: new Icon(Icons.send),
+                        onPressed: () => onSendMessage(textEditingController.text, 0),
+                        color: primaryColor,
+                      ),
+                    ),
+                    color: greyColor2,
                   ),
-                ),
-                color: greyColor2,
+                ],
               ),
-            ],
-          ),
-          color: greyColor2,
-          width: double.infinity,
-          height: 50.0,
-        )
+              color: greyColor2,
+              width: double.infinity,
+              height: 50.0,
+            )
+          ],
+        ),
+
+        // Loading
+        Positioned(
+          child: isLoading
+              ? Container(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  color: Colors.white.withOpacity(0.8),
+                )
+              : Container(),
+        ),
       ],
     );
   }
