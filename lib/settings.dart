@@ -185,7 +185,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'Nickname',
-                      style: TextStyle(fontStyle: FontStyle.italic, color: primaryColor),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
                   ),
@@ -211,7 +211,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'About me',
-                      style: TextStyle(fontStyle: FontStyle.italic, color: primaryColor),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
                   ),

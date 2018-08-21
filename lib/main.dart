@@ -117,7 +117,6 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    print(currentUserId);
     if (document['id'] == currentUserId) {
       return Container();
     } else {
@@ -138,9 +137,30 @@ class MainScreenState extends State<MainScreen> {
                   borderRadius: BorderRadius.all(Radius.circular(50.0)),
                 ),
               ),
-              Container(
-                child: Text(document['nickname']),
-                margin: EdgeInsets.only(left: 20.0),
+              new Flexible(
+                child: Container(
+                  child: new Column(
+                    children: <Widget>[
+                      new Container(
+                        child: Text(
+                          'Nickname: ${document['nickname']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: new EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                      ),
+                      new Container(
+                        child: Text(
+                          'About me: ${document['aboutMe']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: new EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                      )
+                    ],
+                  ),
+                  margin: EdgeInsets.only(left: 20.0),
+                ),
               ),
             ],
           ),
@@ -153,11 +173,11 @@ class MainScreenState extends State<MainScreen> {
                           peerAvatar: document['photoUrl'],
                         )));
           },
-          color: Colors.grey.withOpacity(0.1),
-          padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
+          color: greyColor2,
+          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
-        margin: EdgeInsets.only(bottom: 10.0),
+        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
     }
   }

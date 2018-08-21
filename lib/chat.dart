@@ -162,7 +162,7 @@ class ChatScreenState extends State<ChatScreen> {
                   padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                   width: 200.0,
                   decoration: BoxDecoration(color: greyColor2, borderRadius: BorderRadius.circular(8.0)),
-                  margin: EdgeInsets.only(bottom: 15.0),
+                  margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
                 )
               : Container(
                   child: Material(
@@ -176,7 +176,7 @@ class ChatScreenState extends State<ChatScreen> {
                       Radius.circular(8.0),
                     ),
                   ),
-                  margin: EdgeInsets.only(bottom: 15.0),
+                  margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
                 ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
@@ -277,7 +277,7 @@ class ChatScreenState extends State<ChatScreen> {
                         color: primaryColor,
                       ),
                     ),
-                    color: greyColor2,
+                    color: Colors.white,
                   ),
 
                   // Edit text
@@ -304,13 +304,14 @@ class ChatScreenState extends State<ChatScreen> {
                         color: primaryColor,
                       ),
                     ),
-                    color: greyColor2,
+                    color: Colors.white,
                   ),
                 ],
               ),
-              color: greyColor2,
               width: double.infinity,
               height: 50.0,
+              decoration: new BoxDecoration(
+                  border: new Border(top: new BorderSide(color: greyColor2, width: 0.5)), color: Colors.white),
             )
           ],
         ),

@@ -48,10 +48,7 @@ class LoginScreenState extends State<LoginScreen> {
     if (prefs.getString('id') != null) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => MainScreen(
-                  currentUserId: prefs.getString('id'),
-                )),
+        MaterialPageRoute(builder: (context) => MainScreen(currentUserId: prefs.getString('id'))),
       );
     } else {
       this.setState(() {
@@ -65,16 +62,27 @@ class LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken,
       );
       if (firebaseUser != null) {
-        // Update data to local
-        currentUser = firebaseUser;
-        saveLocal();
+        // Check is already sign up
+        final QuerySnapshot result =
+            await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
+        final List<DocumentSnapshot> documents = result.documents;
+        if (documents.length == 0) {
+          // Update data to server if new user
+          Firestore.instance.collection('users').document(firebaseUser.uid).updateData(
+              {'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
 
-        // Update data to server
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
-
+          // Write data to local
+          currentUser = firebaseUser;
+          await prefs.setString('id', currentUser.uid);
+          await prefs.setString('nickname', currentUser.displayName);
+          await prefs.setString('photoUrl', currentUser.photoUrl);
+        } else {
+          // Write data to local
+          await prefs.setString('id', documents[0]['id']);
+          await prefs.setString('nickname', documents[0]['nickname']);
+          await prefs.setString('photoUrl', documents[0]['photoUrl']);
+          await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        }
         Fluttertoast.showToast(msg: "Sign in success");
         this.setState(() {
           isLoading = false;
@@ -94,12 +102,6 @@ class LoginScreenState extends State<LoginScreen> {
         });
       }
     }
-  }
-
-  void saveLocal() async {
-    await prefs.setString('id', currentUser.uid);
-    await prefs.setString('nickname', currentUser.displayName);
-    await prefs.setString('photoUrl', currentUser.photoUrl);
   }
 
   @override
