@@ -10,6 +10,7 @@ import 'package:flutter_chat_demo/const.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Chat extends StatelessWidget {
   final String peerId;
@@ -165,18 +166,16 @@ class ChatScreenState extends State<ChatScreen> {
                   margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
                 )
               : Container(
-                  child: Material(
-                    child: Image.network(
-                      document['content'],
-                      width: 200.0,
-                      height: 200.0,
+                  margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    image: DecorationImage(
                       fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8.0),
+                      image: CachedNetworkImageProvider(document['content']),
                     ),
                   ),
-                  margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
+                  width: 200.0,
+                  height: 200.0,
                 ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
@@ -186,16 +185,17 @@ class ChatScreenState extends State<ChatScreen> {
       return Container(
         child: Row(
           children: <Widget>[
-            Material(
-              child: Image.network(
-                peerAvatar,
-                width: 35.0,
-                height: 35.0,
-                fit: BoxFit.cover,
+            Container(
+              margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(document['content']),
+                ),
               ),
-              borderRadius: BorderRadius.all(
-                Radius.circular(18.0),
-              ),
+              width: 200.0,
+              height: 200.0,
             ),
             document['type'] == 0
                 ? Container(
