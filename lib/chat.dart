@@ -53,7 +53,6 @@ class ChatScreenState extends State<ChatScreen> {
   String peerAvatar;
   String id;
 
-  bool isTyping;
   String groupChatId;
   SharedPreferences prefs;
 
@@ -69,7 +68,6 @@ class ChatScreenState extends State<ChatScreen> {
     super.initState();
 
     groupChatId = '';
-    isTyping = false;
 
     isLoading = false;
     imageUrl = '';
@@ -149,7 +147,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot document) {
+  Widget buildItem(int index, DocumentSnapshot document) {
     if (document['idFrom'] == id) {
       // Right (my message)
       return Row(
@@ -170,7 +168,9 @@ class ChatScreenState extends State<ChatScreen> {
                   child: Material(
                     child: CachedNetworkImage(
                       placeholder: Container(
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                        ),
                         width: 200.0,
                         height: 200.0,
                         padding: EdgeInsets.all(70.0),
@@ -194,7 +194,10 @@ class ChatScreenState extends State<ChatScreen> {
             Material(
               child: CachedNetworkImage(
                 placeholder: Container(
-                  child: CircularProgressIndicator(strokeWidth: 1.0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                  ),
                   width: 35.0,
                   height: 35.0,
                   padding: EdgeInsets.all(10.0),
@@ -223,7 +226,9 @@ class ChatScreenState extends State<ChatScreen> {
                     child: Material(
                       child: CachedNetworkImage(
                         placeholder: Container(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                          ),
                           width: 200.0,
                           height: 200.0,
                           padding: EdgeInsets.all(70.0),
@@ -253,7 +258,7 @@ class ChatScreenState extends State<ChatScreen> {
           children: <Widget>[
             Flexible(
               child: groupChatId == ''
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
                   : StreamBuilder(
                       stream: Firestore.instance
                           .collection('messages')
@@ -264,11 +269,12 @@ class ChatScreenState extends State<ChatScreen> {
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
+                          return Center(
+                              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)));
                         } else {
                           return ListView.builder(
                             padding: EdgeInsets.all(10.0),
-                            itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
+                            itemBuilder: (context, index) => buildItem(index, snapshot.data.documents[index]),
                             itemCount: snapshot.data.documents.length,
                             reverse: true,
                             controller: listScrollController,
@@ -336,7 +342,7 @@ class ChatScreenState extends State<ChatScreen> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )

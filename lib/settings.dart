@@ -141,7 +141,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                               ? Material(
                                   child: CachedNetworkImage(
                                     placeholder: Container(
-                                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                      ),
                                       width: 90.0,
                                       height: 90.0,
                                       padding: EdgeInsets.all(20.0),
@@ -269,7 +272,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )

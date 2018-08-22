@@ -128,7 +128,10 @@ class MainScreenState extends State<MainScreen> {
               Material(
                 child: CachedNetworkImage(
                   placeholder: Container(
-                    child: CircularProgressIndicator(strokeWidth: 1.0),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.0,
+                      valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                    ),
                     width: 50.0,
                     height: 50.0,
                     padding: EdgeInsets.all(15.0),
@@ -251,7 +254,11 @@ class MainScreenState extends State<MainScreen> {
                 stream: Firestore.instance.collection('users').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                      ),
+                    );
                   } else {
                     return ListView.builder(
                       padding: EdgeInsets.all(10.0),
@@ -268,7 +275,7 @@ class MainScreenState extends State<MainScreen> {
               child: isLoading
                   ? Container(
                       child: Center(
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                       ),
                       color: Colors.white.withOpacity(0.8),
                     )
