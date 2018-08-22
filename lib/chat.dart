@@ -167,15 +167,21 @@ class ChatScreenState extends State<ChatScreen> {
                 )
               : Container(
                   margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    image: DecorationImage(
+                  child: Material(
+                    child: CachedNetworkImage(
+                      placeholder: Container(
+                        child: CircularProgressIndicator(),
+                        width: 200.0,
+                        height: 200.0,
+                        padding: EdgeInsets.all(70.0),
+                      ),
+                      imageUrl: document['content'],
+                      width: 200.0,
+                      height: 200.0,
                       fit: BoxFit.cover,
-                      image: CachedNetworkImageProvider(document['content']),
                     ),
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   ),
-                  width: 200.0,
-                  height: 200.0,
                 ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
@@ -185,17 +191,22 @@ class ChatScreenState extends State<ChatScreen> {
       return Container(
         child: Row(
           children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(bottom: 15.0, right: 10.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(document['content']),
+            Material(
+              child: CachedNetworkImage(
+                placeholder: Container(
+                  child: CircularProgressIndicator(strokeWidth: 1.0),
+                  width: 35.0,
+                  height: 35.0,
+                  padding: EdgeInsets.all(10.0),
                 ),
+                imageUrl: peerAvatar,
+                width: 35.0,
+                height: 35.0,
+                fit: BoxFit.cover,
               ),
-              width: 200.0,
-              height: 200.0,
+              borderRadius: BorderRadius.all(
+                Radius.circular(18.0),
+              ),
             ),
             document['type'] == 0
                 ? Container(
@@ -210,15 +221,19 @@ class ChatScreenState extends State<ChatScreen> {
                   )
                 : Container(
                     child: Material(
-                      child: Image.network(
-                        document['content'],
+                      child: CachedNetworkImage(
+                        placeholder: Container(
+                          child: CircularProgressIndicator(),
+                          width: 200.0,
+                          height: 200.0,
+                          padding: EdgeInsets.all(70.0),
+                        ),
+                        imageUrl: document['content'],
                         width: 200.0,
                         height: 200.0,
                         fit: BoxFit.cover,
                       ),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(8.0),
-                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
                     margin: EdgeInsets.only(left: 10.0),
                   ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -138,8 +139,14 @@ class SettingsScreenState extends State<SettingsScreen> {
                       (avatarImageFile == null)
                           ? (photoUrl != ''
                               ? Material(
-                                  child: Image.network(
-                                    photoUrl,
+                                  child: CachedNetworkImage(
+                                    placeholder: Container(
+                                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                                      width: 90.0,
+                                      height: 90.0,
+                                      padding: EdgeInsets.all(20.0),
+                                    ),
+                                    imageUrl: photoUrl,
                                     width: 90.0,
                                     height: 90.0,
                                     fit: BoxFit.cover,

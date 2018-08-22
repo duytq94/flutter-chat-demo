@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_demo/const.dart';
@@ -124,18 +125,20 @@ class MainScreenState extends State<MainScreen> {
         child: FlatButton(
           child: Row(
             children: <Widget>[
-              Container(
-                width: 50.0,
-                height: 50.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      document['photoUrl'],
-                    ),
-                    fit: BoxFit.cover,
+              Material(
+                child: CachedNetworkImage(
+                  placeholder: Container(
+                    child: CircularProgressIndicator(strokeWidth: 1.0),
+                    width: 50.0,
+                    height: 50.0,
+                    padding: EdgeInsets.all(15.0),
                   ),
-                  borderRadius: BorderRadius.all(Radius.circular(50.0)),
+                  imageUrl: document['photoUrl'],
+                  width: 50.0,
+                  height: 50.0,
+                  fit: BoxFit.cover,
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),
               new Flexible(
                 child: Container(
