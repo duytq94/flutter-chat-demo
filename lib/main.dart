@@ -157,7 +157,7 @@ class MainScreenState extends State<MainScreen> {
                       ),
                       new Container(
                         child: Text(
-                          'About me: ${document['aboutMe']}',
+                          'About me: ${document['aboutMe'] ?? 'Not available'}',
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,

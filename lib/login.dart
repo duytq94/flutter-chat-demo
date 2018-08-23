@@ -68,7 +68,7 @@ class LoginScreenState extends State<LoginScreen> {
         final List<DocumentSnapshot> documents = result.documents;
         if (documents.length == 0) {
           // Update data to server if new user
-          Firestore.instance.collection('users').document(firebaseUser.uid).updateData(
+          Firestore.instance.collection('users').document(firebaseUser.uid).setData(
               {'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
 
           // Write data to local
