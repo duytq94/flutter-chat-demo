@@ -80,15 +80,11 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future uploadFile() async {
-    final ByteData bytes = await rootBundle.load(avatarImageFile.path);
-    final Directory tempDir = Directory.systemTemp;
-    final String fileName = id;
-    final File file = File('${tempDir.path}/$fileName');
-    file.writeAsBytes(bytes.buffer.asInt8List(), mode: FileMode.write);
+    String fileName = id;
+    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = reference.putFile(avatarImageFile);
 
-    final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
-    final StorageUploadTask task = ref.putFile(file);
-    final Uri downloadUrl = (await task.future).downloadUrl;
+    Uri downloadUrl = (await uploadTask.future).downloadUrl;
     photoUrl = downloadUrl.toString();
 
     Firestore.instance
