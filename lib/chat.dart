@@ -116,7 +116,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   void getSticker() {
     // Hide keyboard when sticker appear
-    FocusScope.of(context).requestFocus(new FocusNode());
+    focusNode.unfocus();
     setState(() {
       isShowSticker = !isShowSticker;
     });
