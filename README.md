@@ -4,8 +4,7 @@
 * A chat app made by Flutter and Firebase.
 * Support login with google account, chat with any user, send text, image and sticker, update avatar and profile.
 * Watch the video demo to clearly: https://youtu.be/MOHE68LI5Eg
-* Check my general guidance to know more and how to do it:
-https://medium.com/@duytq94/facebook-reactions-with-flutter-9019ce8b95b8
+* Check my general guidance to know more and how to do it: comming soon...
 
 ## Screenshot:
 
