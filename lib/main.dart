@@ -28,9 +28,9 @@ class MainScreenState extends State<MainScreen> {
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
   ];
 
-  Future<bool> onWillPopScope() {
+  Future<bool> onBackPress() {
     openDialog();
-    return new Future.value(false);
+    return Future.value(false);
   }
 
   Future<Null> openDialog() async {
@@ -283,7 +283,7 @@ class MainScreenState extends State<MainScreen> {
             )
           ],
         ),
-        onWillPop: onWillPopScope,
+        onWillPop: onBackPress,
       ),
     );
   }

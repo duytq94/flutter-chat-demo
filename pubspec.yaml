@@ -39,6 +39,15 @@ flutter:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
      - images/img_not_available.jpeg
+     - images/mimi1.gif
+     - images/mimi2.gif
+     - images/mimi3.gif
+     - images/mimi4.gif
+     - images/mimi5.gif
+     - images/mimi6.gif
+     - images/mimi7.gif
+     - images/mimi8.gif
+     - images/mimi9.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.
