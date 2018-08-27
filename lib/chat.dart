@@ -193,6 +193,12 @@ class ChatScreenState extends State<ChatScreen> {
                             width: 200.0,
                             height: 200.0,
                             padding: EdgeInsets.all(70.0),
+                            decoration: BoxDecoration(
+                              color: greyColor2,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8.0),
+                              ),
+                            ),
                           ),
                           errorWidget: Material(
                             child: Image.asset(
@@ -278,6 +284,12 @@ class ChatScreenState extends State<ChatScreen> {
                                   width: 200.0,
                                   height: 200.0,
                                   padding: EdgeInsets.all(70.0),
+                                  decoration: BoxDecoration(
+                                    color: greyColor2,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
                                 ),
                                 errorWidget: Material(
                                   child: Image.asset(

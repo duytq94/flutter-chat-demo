@@ -45,6 +45,9 @@ class SettingsScreenState extends State<SettingsScreen> {
   bool isLoading = false;
   File avatarImageFile;
 
+  final FocusNode focusNodeNickname = new FocusNode();
+  final FocusNode focusNodeAboutMe = new FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +101,9 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   void handleUpdateData() async {
+    focusNodeNickname.unfocus();
+    focusNodeAboutMe.unfocus();
+
     setState(() {
       isLoading = true;
     });
@@ -206,6 +212,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                         onChanged: (value) {
                           nickname = value;
                         },
+                        focusNode: focusNodeNickname,
                       ),
                     ),
                     margin: EdgeInsets.only(left: 30.0, right: 30.0),
@@ -232,6 +239,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                         onChanged: (value) {
                           aboutMe = value;
                         },
+                        focusNode: focusNodeAboutMe,
                       ),
                     ),
                     margin: EdgeInsets.only(left: 30.0, right: 30.0),
