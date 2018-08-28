@@ -40,7 +40,25 @@ class LoginScreenState extends State<LoginScreen> {
   SharedPreferences prefs;
 
   bool isLoading = false;
+  bool isLoggedIn = false;
   FirebaseUser currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    isSignedIn();
+  }
+
+  void isSignedIn() async {
+    isLoggedIn = await googleSignIn.isSignedIn();
+    prefs = await SharedPreferences.getInstance();
+    if (isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen(currentUserId: prefs.getString('id'))),
+      );
+    }
+  }
 
   Future<Null> handleSignIn() async {
     prefs = await SharedPreferences.getInstance();

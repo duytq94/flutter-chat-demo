@@ -88,7 +88,7 @@ class SettingsScreenState extends State<SettingsScreen> {
     Uri downloadUrl = (await uploadTask.future).downloadUrl;
     photoUrl = downloadUrl.toString();
 
-    Firestore.instance
+    await Firestore.instance
         .collection('users')
         .document(id)
         .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
@@ -108,7 +108,7 @@ class SettingsScreenState extends State<SettingsScreen> {
       isLoading = true;
     });
 
-    Firestore.instance
+    await Firestore.instance
         .collection('users')
         .document(id)
         .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
