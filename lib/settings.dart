@@ -88,19 +88,26 @@ class SettingsScreenState extends State<SettingsScreen> {
     Uri downloadUrl = (await uploadTask.future).downloadUrl;
     photoUrl = downloadUrl.toString();
 
-    await Firestore.instance
+    Firestore.instance
         .collection('users')
         .document(id)
-        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
-    await prefs.setString('photoUrl', photoUrl);
-    setState(() {
-      isLoading = false;
-    });
+        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+      await prefs.setString('photoUrl', photoUrl);
+      setState(() {
+        isLoading = false;
+      });
 
-    Fluttertoast.showToast(msg: "Upload success");
+      Fluttertoast.showToast(msg: "Upload success");
+    }).catchError((err) {
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(msg: err.toString());
+    });
   }
 
-  void handleUpdateData() async {
+  void handleUpdateData() {
     focusNodeNickname.unfocus();
     focusNodeAboutMe.unfocus();
 
@@ -108,20 +115,26 @@ class SettingsScreenState extends State<SettingsScreen> {
       isLoading = true;
     });
 
-    await Firestore.instance
+    Firestore.instance
         .collection('users')
         .document(id)
-        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl});
+        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+      await prefs.setString('nickname', nickname);
+      await prefs.setString('aboutMe', aboutMe);
+      await prefs.setString('photoUrl', photoUrl);
 
-    await prefs.setString('nickname', nickname);
-    await prefs.setString('aboutMe', aboutMe);
-    await prefs.setString('photoUrl', photoUrl);
+      setState(() {
+        isLoading = false;
+      });
 
-    setState(() {
-      isLoading = false;
+      Fluttertoast.showToast(msg: "Update success");
+    }).catchError((err) {
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(msg: err.toString());
     });
-
-    Fluttertoast.showToast(msg: "Update success");
   }
 
   @override
