@@ -11,6 +11,8 @@ import 'package:flutter_chat_demo/login.dart';
 import 'package:flutter_chat_demo/settings.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+void main() => runApp(new MyApp());
+
 class MainScreen extends StatefulWidget {
   final String currentUserId;
 
