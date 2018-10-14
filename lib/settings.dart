@@ -83,26 +83,29 @@ class SettingsScreenState extends State<SettingsScreen> {
   Future uploadFile() async {
     String fileName = id;
     StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(avatarImageFile);
+    reference.putFile(avatarImageFile);
 
-    Uri downloadUrl = (await uploadTask.future).downloadUrl;
-    photoUrl = downloadUrl.toString();
+    reference.getDownloadURL().then((dynamic url) {
+      photoUrl = url.toString();
+      Firestore.instance.collection('users').document(id).updateData({
+        'nickname': nickname,
+        'aboutMe': aboutMe,
+        'photoUrl': photoUrl
+      }).then((data) async {
+        await prefs.setString('photoUrl', photoUrl);
+        setState(() {
+          isLoading = false;
+        });
 
-    Firestore.instance
-        .collection('users')
-        .document(id)
-        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
-      await prefs.setString('photoUrl', photoUrl);
-      setState(() {
-        isLoading = false;
+        Fluttertoast.showToast(msg: "Upload success");
+      }).catchError((err) {
+        setState(() {
+          isLoading = false;
+        });
+
+        Fluttertoast.showToast(msg: err.toString());
       });
-
-      Fluttertoast.showToast(msg: "Upload success");
     }).catchError((err) {
-      setState(() {
-        isLoading = false;
-      });
-
       Fluttertoast.showToast(msg: err.toString());
     });
   }
@@ -115,10 +118,11 @@ class SettingsScreenState extends State<SettingsScreen> {
       isLoading = true;
     });
 
-    Firestore.instance
-        .collection('users')
-        .document(id)
-        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+    Firestore.instance.collection('users').document(id).updateData({
+      'nickname': nickname,
+      'aboutMe': aboutMe,
+      'photoUrl': photoUrl
+    }).then((data) async {
       await prefs.setString('nickname', nickname);
       await prefs.setString('aboutMe', aboutMe);
       await prefs.setString('photoUrl', photoUrl);
@@ -156,7 +160,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                                     placeholder: Container(
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.0,
-                                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                themeColor),
                                       ),
                                       width: 90.0,
                                       height: 90.0,
@@ -167,7 +173,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                                     height: 90.0,
                                     fit: BoxFit.cover,
                                   ),
-                                  borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(45.0)),
+                                  clipBehavior: Clip.hardEdge,
                                 )
                               : Icon(
                                   Icons.account_circle,
@@ -181,7 +189,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 height: 90.0,
                                 fit: BoxFit.cover,
                               ),
-                              borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(45.0)),
+                              clipBehavior: Clip.hardEdge,
                             ),
                       IconButton(
                         icon: Icon(
@@ -208,13 +218,17 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'Nickname',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
                   ),
                   Container(
                     child: Theme(
-                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
+                      data: Theme.of(context)
+                          .copyWith(primaryColor: primaryColor),
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Sweetie',
@@ -235,13 +249,17 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'About me',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
                   ),
                   Container(
                     child: Theme(
-                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
+                      data: Theme.of(context)
+                          .copyWith(primaryColor: primaryColor),
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Fun, like travel and play PES...',
@@ -287,7 +305,8 @@ class SettingsScreenState extends State<SettingsScreen> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
+                    child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )
