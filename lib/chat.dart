@@ -124,12 +124,18 @@ class ChatScreenState extends State<ChatScreen> {
     StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
     StorageUploadTask uploadTask = reference.putFile(imageFile);
     StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-    imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-    setState(() {
-      isLoading = false;
+    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
+      imageUrl = downloadUrl;
+      setState(() {
+        isLoading = false;
+        onSendMessage(imageUrl, 1);
+      });
+    }, onError: (err) {
+      setState(() {
+        isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'This file is not an image');
     });
-
-    onSendMessage(imageUrl, 1);
   }
 
   void onSendMessage(String content, int type) {
