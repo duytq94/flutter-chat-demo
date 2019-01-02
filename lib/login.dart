@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chat Demo',
-      theme: new ThemeData(
+      theme: ThemeData(
         primaryColor: themeColor,
       ),
       home: LoginScreen(title: 'CHAT DEMO'),
@@ -29,11 +29,11 @@ class LoginScreen extends StatefulWidget {
   final String title;
 
   @override
-  LoginScreenState createState() => new LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final GoogleSignIn googleSignIn = new GoogleSignIn();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   SharedPreferences prefs;
 
@@ -58,9 +58,7 @@ class LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) =>
-                MainScreen(currentUserId: prefs.getString('id'))),
+        MaterialPageRoute(builder: (context) => MainScreen(currentUserId: prefs.getString('id'))),
       );
     }
 
@@ -84,21 +82,15 @@ class LoginScreenState extends State<LoginScreen> {
     );
     if (firebaseUser != null) {
       // Check is already sign up
-      final QuerySnapshot result = await Firestore.instance
-          .collection('users')
-          .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
+      final QuerySnapshot result =
+          await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if (documents.length == 0) {
         // Update data to server if new user
         Firestore.instance
             .collection('users')
             .document(firebaseUser.uid)
-            .setData({
-          'nickname': firebaseUser.displayName,
-          'photoUrl': firebaseUser.photoUrl,
-          'id': firebaseUser.uid
-        });
+            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
 
         // Write data to local
         currentUser = firebaseUser;

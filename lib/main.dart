@@ -11,7 +11,7 @@ import 'package:flutter_chat_demo/login.dart';
 import 'package:flutter_chat_demo/settings.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MainScreen extends StatefulWidget {
   final String currentUserId;
@@ -19,7 +19,7 @@ class MainScreen extends StatefulWidget {
   MainScreen({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
-  State createState() => new MainScreenState(currentUserId: currentUserId);
+  State createState() => MainScreenState(currentUserId: currentUserId);
 }
 
 class MainScreenState extends State<MainScreen> {
@@ -43,8 +43,7 @@ class MainScreenState extends State<MainScreen> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding:
-                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
@@ -63,10 +62,7 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
@@ -90,8 +86,7 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -111,8 +106,7 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -155,25 +149,25 @@ class MainScreenState extends State<MainScreen> {
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
               ),
-              new Flexible(
+              Flexible(
                 child: Container(
-                  child: new Column(
+                  child: Column(
                     children: <Widget>[
-                      new Container(
+                      Container(
                         child: Text(
                           'Nickname: ${document['nickname']}',
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
-                        margin: new EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                       ),
-                      new Container(
+                      Container(
                         child: Text(
                           'About me: ${document['aboutMe'] ?? 'Not available'}',
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
-                        margin: new EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                       )
                     ],
                   ),
@@ -185,30 +179,28 @@ class MainScreenState extends State<MainScreen> {
           onPressed: () {
             Navigator.push(
                 context,
-                new MaterialPageRoute(
-                    builder: (context) => new Chat(
+                MaterialPageRoute(
+                    builder: (context) => Chat(
                           peerId: document.documentID,
                           peerAvatar: document['photoUrl'],
                         )));
           },
           color: greyColor2,
           padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
     }
   }
 
-  final GoogleSignIn googleSignIn = new GoogleSignIn();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   void onItemMenuPress(Choice choice) {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Settings()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
     }
   }
 
@@ -225,9 +217,8 @@ class MainScreenState extends State<MainScreen> {
       isLoading = false;
     });
 
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MyApp()),
-        (Route<dynamic> route) => false);
+    Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
   }
 
   @override
@@ -283,8 +274,7 @@ class MainScreenState extends State<MainScreen> {
                   } else {
                     return ListView.builder(
                       padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) =>
-                          buildItem(context, snapshot.data.documents[index]),
+                      itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
                       itemCount: snapshot.data.documents.length,
                     );
                   }
@@ -297,9 +287,7 @@ class MainScreenState extends State<MainScreen> {
               child: isLoading
                   ? Container(
                       child: Center(
-                        child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(themeColor)),
+                        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                       ),
                       color: Colors.white.withOpacity(0.8),
                     )
