@@ -189,32 +189,32 @@ class ChatScreenState extends State<ChatScreen> {
                   ? Container(
                       child: Material(
                         child: CachedNetworkImage(
-                          placeholder: Container(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                            ),
-                            width: 200.0,
-                            height: 200.0,
-                            padding: EdgeInsets.all(70.0),
-                            decoration: BoxDecoration(
-                              color: greyColor2,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8.0),
+                          placeholder: (context, url) => Container(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                ),
+                                width: 200.0,
+                                height: 200.0,
+                                padding: EdgeInsets.all(70.0),
+                                decoration: BoxDecoration(
+                                  color: greyColor2,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          errorWidget: Material(
-                            child: Image.asset(
-                              'images/img_not_available.jpeg',
-                              width: 200.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(8.0),
-                            ),
-                            clipBehavior: Clip.hardEdge,
-                          ),
+                          errorWidget: (context, url, error) => Material(
+                                child: Image.asset(
+                                  'images/img_not_available.jpeg',
+                                  width: 200.0,
+                                  height: 200.0,
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8.0),
+                                ),
+                                clipBehavior: Clip.hardEdge,
+                              ),
                           imageUrl: document['content'],
                           width: 200.0,
                           height: 200.0,
@@ -248,15 +248,15 @@ class ChatScreenState extends State<ChatScreen> {
                 isLastMessageLeft(index)
                     ? Material(
                         child: CachedNetworkImage(
-                          placeholder: Container(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                            ),
-                            width: 35.0,
-                            height: 35.0,
-                            padding: EdgeInsets.all(10.0),
-                          ),
+                          placeholder: (context, url) => Container(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.0,
+                                  valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                ),
+                                width: 35.0,
+                                height: 35.0,
+                                padding: EdgeInsets.all(10.0),
+                              ),
                           imageUrl: peerAvatar,
                           width: 35.0,
                           height: 35.0,
@@ -283,32 +283,32 @@ class ChatScreenState extends State<ChatScreen> {
                         ? Container(
                             child: Material(
                               child: CachedNetworkImage(
-                                placeholder: Container(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                                  ),
-                                  width: 200.0,
-                                  height: 200.0,
-                                  padding: EdgeInsets.all(70.0),
-                                  decoration: BoxDecoration(
-                                    color: greyColor2,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8.0),
+                                placeholder: (context, url) => Container(
+                                      child: CircularProgressIndicator(
+                                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                      ),
+                                      width: 200.0,
+                                      height: 200.0,
+                                      padding: EdgeInsets.all(70.0),
+                                      decoration: BoxDecoration(
+                                        color: greyColor2,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8.0),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                errorWidget: Material(
-                                  child: Image.asset(
-                                    'images/img_not_available.jpeg',
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                  clipBehavior: Clip.hardEdge,
-                                ),
+                                errorWidget: (context, url, error) => Material(
+                                      child: Image.asset(
+                                        'images/img_not_available.jpeg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8.0),
+                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                    ),
                                 imageUrl: document['content'],
                                 width: 200.0,
                                 height: 200.0,

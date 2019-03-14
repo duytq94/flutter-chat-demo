@@ -76,10 +76,14 @@ class LoginScreenState extends State<LoginScreen> {
 
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    FirebaseUser firebaseUser = await firebaseAuth.signInWithGoogle(
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+
+    FirebaseUser firebaseUser = await firebaseAuth.signInWithCredential(credential);
+
     if (firebaseUser != null) {
       // Check is already sign up
       final QuerySnapshot result =

@@ -171,15 +171,15 @@ class SettingsScreenState extends State<SettingsScreen> {
                           ? (photoUrl != ''
                               ? Material(
                                   child: CachedNetworkImage(
-                                    placeholder: Container(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.0,
-                                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                                      ),
-                                      width: 90.0,
-                                      height: 90.0,
-                                      padding: EdgeInsets.all(20.0),
-                                    ),
+                                    placeholder: (context, url) => Container(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.0,
+                                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                          ),
+                                          width: 90.0,
+                                          height: 90.0,
+                                          padding: EdgeInsets.all(20.0),
+                                        ),
                                     imageUrl: photoUrl,
                                     width: 90.0,
                                     height: 90.0,
