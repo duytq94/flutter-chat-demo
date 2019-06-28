@@ -12,14 +12,14 @@
         <entry key="boolean_selector">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/boolean_selector-1.0.4/lib" />
+              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/boolean_selector-1.0.5/lib" />
             </list>
           </value>
         </entry>
         <entry key="cached_network_image">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/cached_network_image-0.8.0/lib" />
+              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/cached_network_image-1.0.0/lib" />
             </list>
           </value>
         </entry>
@@ -96,7 +96,7 @@
         <entry key="flutter_cache_manager">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/flutter_cache_manager-0.3.2/lib" />
+              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/flutter_cache_manager-1.0.0/lib" />
             </list>
           </value>
         </entry>
@@ -180,7 +180,7 @@
         <entry key="pedantic">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/pedantic-1.5.0/lib" />
+              <option value="$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/pedantic-1.7.0/lib" />
             </list>
           </value>
         </entry>
@@ -286,8 +286,8 @@
     </properties>
     <CLASSES>
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/async-2.2.0/lib" />
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/boolean_selector-1.0.4/lib" />
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/cached_network_image-0.8.0/lib" />
+      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/boolean_selector-1.0.5/lib" />
+      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/cached_network_image-1.0.0/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/charcode-1.1.2/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/cloud_firestore-0.8.2+3/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/collection-1.14.11/lib" />
@@ -297,7 +297,7 @@
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/firebase_auth-0.7.0/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/firebase_core-0.2.5+1/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/firebase_storage-1.0.4/lib" />
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/flutter_cache_manager-0.3.2/lib" />
+      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/flutter_cache_manager-1.0.0/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/fluttertoast-2.2.11/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/google_sign_in-3.2.4/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/http-0.12.0+2/lib" />
@@ -308,7 +308,7 @@
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/meta-1.1.6/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/path-1.6.2/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/path_provider-0.5.0+1/lib" />
-      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/pedantic-1.5.0/lib" />
+      <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/pedantic-1.7.0/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/quiver-2.0.3/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/shared_preferences-0.4.3/lib" />
       <root url="file://$USER_HOME$/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/source_span-1.5.5/lib" />
