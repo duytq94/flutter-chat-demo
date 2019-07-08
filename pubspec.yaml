@@ -6,13 +6,13 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
-  firebase_auth: 0.7.0
-  google_sign_in: 3.2.4
-  cloud_firestore: 0.8.2+3
+  firebase_auth: 0.11.1+7
+  google_sign_in: 4.0.2
+  cloud_firestore: 0.12.7
   fluttertoast: ^2.0.7
-  image_picker: 0.4.12+1
-  shared_preferences: 0.4.3
-  firebase_storage: 1.0.4
+  image_picker: 0.6.0+11
+  shared_preferences: 0.5.3+2
+  firebase_storage: 3.0.2
   cached_network_image: ^1.0.0
   intl: ^0.15.7
 

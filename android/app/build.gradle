@@ -28,7 +28,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -59,10 +59,9 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compile 'com.google.firebase:firebase-core:16.0.7'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    compile 'com.google.firebase:firebase-core:17.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
-com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

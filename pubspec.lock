@@ -14,7 +14,7 @@ packages:
       name: boolean_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.4"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -35,7 +35,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2+3"
+    version: "0.12.7"
   collection:
     dependency: transitive
     description:
@@ -70,21 +70,21 @@ packages:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.0"
+    version: "0.11.1+7"
   firebase_core:
     dependency: transitive
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5+1"
+    version: "0.4.0+6"
   firebase_storage:
     dependency: "direct main"
     description:
       name: firebase_storage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "3.0.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -115,7 +115,7 @@ packages:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.4"
+    version: "4.0.2"
   http:
     dependency: transitive
     description:
@@ -136,7 +136,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.12+1"
+    version: "0.6.0+11"
   intl:
     dependency: "direct main"
     description:
@@ -192,7 +192,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.3"
+    version: "0.5.3+2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -277,4 +277,4 @@ packages:
     version: "2.0.8"
 sdks:
   dart: ">=2.2.2 <3.0.0"
-  flutter: ">=1.2.1 <2.0.0"
+  flutter: ">=1.5.0 <2.0.0"
