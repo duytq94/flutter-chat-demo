@@ -15,6 +15,7 @@ dependencies:
   firebase_storage: 3.0.2
   cached_network_image: ^1.0.0
   intl: ^0.15.7
+  firebase_messaging: 5.1.0
 
 dev_dependencies:
   flutter_test:
