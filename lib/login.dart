@@ -95,7 +95,8 @@ class LoginScreenState extends State<LoginScreen> {
           'nickname': firebaseUser.displayName,
           'photoUrl': firebaseUser.photoUrl,
           'id': firebaseUser.uid,
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString()
+          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+          'chattingWith': null
         });
 
         // Write data to local
@@ -115,13 +116,7 @@ class LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MainScreen(
-                  currentUserId: firebaseUser.uid,
-                )),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen(currentUserId: firebaseUser.uid)));
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
