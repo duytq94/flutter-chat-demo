@@ -2,14 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
-	<string>ca-app-pub-3940256099942544/2934735716</string>
-	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
-	<string>ca-app-pub-3940256099942544/4411468910</string>
 	<key>CLIENT_ID</key>
-	<string>347976604232-13h782ee23otgsaaiidgeb43jnp1jepd.apps.googleusercontent.com</string>
+	<string>347976604232-tkt67s3gule9mfekuegqprqai45f12km.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.347976604232-13h782ee23otgsaaiidgeb43jnp1jepd</string>
+	<string>com.googleusercontent.apps.347976604232-tkt67s3gule9mfekuegqprqai45f12km</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>347976604232-cs3athvek5l2ehqjudkhpj0qq8rgp8i9.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAdn3U0F35xhx2zUFfz6XPOcNm50erGZS0</string>
 	<key>GCM_SENDER_ID</key>
@@ -17,23 +15,23 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.dfa.flutterChatDemo</string>
+	<string>com.duytq.flutterchatdemo</string>
 	<key>PROJECT_ID</key>
 	<string>flutterchatdemo</string>
 	<key>STORAGE_BUCKET</key>
 	<string>flutterchatdemo.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<true></true>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
 	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<false></false>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
 	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:347976604232:ios:f43eb2afc88737b9</string>
+	<string>1:347976604232:ios:2a379f1827e4427b</string>
 	<key>DATABASE_URL</key>
 	<string>https://flutterchatdemo.firebaseio.com</string>
 </dict>
