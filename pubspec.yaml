@@ -17,6 +17,7 @@ dependencies:
   intl: ^0.15.7
   firebase_messaging: 5.1.2
   flutter_local_notifications: ^0.8.0
+  photo_view: ^0.4.2
 
 dev_dependencies:
   flutter_test:
