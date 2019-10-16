@@ -82,7 +82,7 @@ class LoginScreenState extends State<LoginScreen> {
       idToken: googleAuth.idToken,
     );
 
-    FirebaseUser firebaseUser = await firebaseAuth.signInWithCredential(credential);
+    FirebaseUser firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
 
     if (firebaseUser != null) {
       // Check is already sign up
