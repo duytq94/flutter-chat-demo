@@ -13,7 +13,7 @@ dependencies:
   image_picker: ^0.6.1+8
   shared_preferences: ^0.5.3+4
   firebase_storage: ^3.0.6
-  cached_network_image: ^1.1.1
+  cached_network_image: 2.0.0-rc.1
   intl: ^0.15.7
   firebase_messaging: ^5.1.6
   flutter_local_notifications: ^0.8.4
