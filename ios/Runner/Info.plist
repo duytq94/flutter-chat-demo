@@ -31,12 +31,19 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need open gallery for you choose a photo</string>
-	<key>NSCameraUsageDescription</key>
-	<string>We need open camera for you capture a photo</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need open camera for you capture a photo</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need open gallery for you choose a photo</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
