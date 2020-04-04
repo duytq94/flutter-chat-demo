@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name=".Application"
         android:icon="@mipmap/ic_launcher"
         android:label="flutter_chat_demo">
         <meta-data
@@ -21,9 +21,14 @@
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="FLUTTER_NOTIFICATION_CLICK" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
