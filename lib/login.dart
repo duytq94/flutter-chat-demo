@@ -4,24 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/const.dart';
-import 'package:flutter_chat_demo/main.dart';
+import 'package:flutter_chat_demo/home.dart';
+import 'package:flutter_chat_demo/widget/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat Demo',
-      theme: ThemeData(
-        primaryColor: themeColor,
-      ),
-      home: LoginScreen(title: 'CHAT DEMO'),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key, this.title}) : super(key: key);
@@ -58,7 +45,7 @@ class LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen(currentUserId: prefs.getString('id'))),
+        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: prefs.getString('id'))),
       );
     }
 
@@ -116,7 +103,7 @@ class LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
 
-      Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen(currentUserId: firebaseUser.uid)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: firebaseUser.uid)));
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
@@ -153,16 +140,7 @@ class LoginScreenState extends State<LoginScreen> {
 
             // Loading
             Positioned(
-              child: isLoading
-                  ? Container(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                        ),
-                      ),
-                      color: Colors.white.withOpacity(0.8),
-                    )
-                  : Container(),
+              child: isLoading ? const Loading() : Container(),
             ),
           ],
         ));
