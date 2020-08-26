@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/const.dart';
 import 'package:flutter_chat_demo/home.dart';
@@ -12,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key, this.title}) : super(key: key);
+  final Future<FirebaseApp> firebase = Firebase.initializeApp();
 
   final String title;
 
@@ -26,7 +28,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   bool isLoading = false;
   bool isLoggedIn = false;
-  FirebaseUser currentUser;
+  User currentUser;
 
   @override
   void initState() {
@@ -45,7 +47,9 @@ class LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: prefs.getString('id'))),
+        MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(currentUserId: prefs.getString('id'))),
       );
     }
 
@@ -64,23 +68,29 @@ class LoginScreenState extends State<LoginScreen> {
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    FirebaseUser firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
+    User firebaseUser =
+        (await firebaseAuth.signInWithCredential(credential)).user;
 
     if (firebaseUser != null) {
       // Check is already sign up
-      final QuerySnapshot result =
-          await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
+      final QuerySnapshot result = await FirebaseFirestore.instance
+          .collection('users')
+          .where('id', isEqualTo: firebaseUser.uid)
+          .get();
+      final List<DocumentSnapshot> documents = result.docs;
       if (documents.length == 0) {
         // Update data to server if new user
-        Firestore.instance.collection('users').document(firebaseUser.uid).setData({
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set({
           'nickname': firebaseUser.displayName,
-          'photoUrl': firebaseUser.photoUrl,
+          'photoUrl': firebaseUser.photoURL,
           'id': firebaseUser.uid,
           'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
           'chattingWith': null
@@ -90,20 +100,24 @@ class LoginScreenState extends State<LoginScreen> {
         currentUser = firebaseUser;
         await prefs.setString('id', currentUser.uid);
         await prefs.setString('nickname', currentUser.displayName);
-        await prefs.setString('photoUrl', currentUser.photoUrl);
+        await prefs.setString('photoUrl', currentUser.photoURL);
       } else {
         // Write data to local
-        await prefs.setString('id', documents[0]['id']);
-        await prefs.setString('nickname', documents[0]['nickname']);
-        await prefs.setString('photoUrl', documents[0]['photoUrl']);
-        await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        await prefs.setString('id', documents[0].data()['id']);
+        await prefs.setString('nickname', documents[0].data()['nickname']);
+        await prefs.setString('photoUrl', documents[0].data()['photoUrl']);
+        await prefs.setString('aboutMe', documents[0].data()['aboutMe']);
       }
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
         isLoading = false;
       });
 
-      Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: firebaseUser.uid)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  HomeScreen(currentUserId: firebaseUser.uid)));
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
