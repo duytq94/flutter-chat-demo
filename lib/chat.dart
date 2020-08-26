@@ -619,6 +619,9 @@ class ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: Container(
               child: TextField(
+                onSubmitted: (value) {
+                  onSendMessage(textEditingController.text, 0);
+                },
                 style: TextStyle(color: primaryColor, fontSize: 15.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
