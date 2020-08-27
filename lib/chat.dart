@@ -57,7 +57,9 @@ class ChatScreenState extends State<ChatScreen> {
   String peerAvatar;
   String id;
 
-  List<QueryDocumentSnapshot> listMessage;
+  List<QueryDocumentSnapshot> listMessage = new List.from([]);
+  int _limit = 20;
+  final int _limitIncrement = 20;
   String groupChatId;
   SharedPreferences prefs;
 
@@ -70,10 +72,31 @@ class ChatScreenState extends State<ChatScreen> {
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
 
+  _scrollListener() {
+    if (listScrollController.offset >=
+            listScrollController.position.maxScrollExtent &&
+        !listScrollController.position.outOfRange) {
+      print("reach the bottom");
+      setState(() {
+        print("reach the bottom");
+        _limit += _limitIncrement;
+      });
+    }
+    if (listScrollController.offset <=
+            listScrollController.position.minScrollExtent &&
+        !listScrollController.position.outOfRange) {
+      print("reach the top");
+      setState(() {
+        print("reach the top");
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChange);
+    listScrollController.addListener(_scrollListener);
 
     groupChatId = '';
 
@@ -178,7 +201,10 @@ class ChatScreenState extends State<ChatScreen> {
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
-      Fluttertoast.showToast(msg: 'Nothing to send');
+      Fluttertoast.showToast(
+          msg: 'Nothing to send',
+          backgroundColor: Colors.black,
+          textColor: Colors.red);
     }
   }
 
@@ -667,7 +693,7 @@ class ChatScreenState extends State<ChatScreen> {
                   .doc(groupChatId)
                   .collection(groupChatId)
                   .orderBy('timestamp', descending: true)
-                  .limit(20)
+                  .limit(_limit)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -676,7 +702,7 @@ class ChatScreenState extends State<ChatScreen> {
                           valueColor:
                               AlwaysStoppedAnimation<Color>(themeColor)));
                 } else {
-                  listMessage = snapshot.data.documents;
+                  listMessage.addAll(snapshot.data.documents);
                   return ListView.builder(
                     padding: EdgeInsets.all(10.0),
                     itemBuilder: (context, index) =>
