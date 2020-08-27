@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key, this.title}) : super(key: key);
-  final Future<FirebaseApp> firebase = Firebase.initializeApp();
 
   final String title;
 
