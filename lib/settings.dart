@@ -69,9 +69,12 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future getImage() async {
-    ImagePicker imagePicker;
-    File image =
-        await imagePicker.getImage(source: ImageSource.gallery) as File;
+    ImagePicker imagePicker = ImagePicker();
+    PickedFile pickedFile;
+
+    pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
+
+    File image = File(pickedFile.path);
 
     if (image != null) {
       setState(() {
