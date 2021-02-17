@@ -31,10 +31,12 @@ class HomeScreenState extends State<HomeScreen> {
 
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  final ScrollController listScrollController = ScrollController();
 
+  int _limit = 20;
+  int _limitIncrement = 20;
   bool isLoading = false;
   List<Choice> choices = const <Choice>[
     const Choice(title: 'Settings', icon: Icons.settings),
@@ -46,6 +48,7 @@ class HomeScreenState extends State<HomeScreen> {
     super.initState();
     registerNotification();
     configLocalNotification();
+    listScrollController.addListener(scrollListener);
   }
 
   void registerNotification() {
@@ -53,9 +56,7 @@ class HomeScreenState extends State<HomeScreen> {
 
     firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
       print('onMessage: $message');
-      Platform.isAndroid
-          ? showNotification(message['notification'])
-          : showNotification(message['aps']['alert']);
+      Platform.isAndroid ? showNotification(message['notification']) : showNotification(message['aps']['alert']);
       return;
     }, onResume: (Map<String, dynamic> message) {
       print('onResume: $message');
@@ -67,38 +68,39 @@ class HomeScreenState extends State<HomeScreen> {
 
     firebaseMessaging.getToken().then((token) {
       print('token: $token');
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUserId)
-          .update({'pushToken': token});
+      FirebaseFirestore.instance.collection('users').doc(currentUserId).update({'pushToken': token});
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
   }
 
   void configLocalNotification() {
-    var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
+    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
+    var initializationSettings = new InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  void scrollListener() {
+    if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
+        !listScrollController.position.outOfRange) {
+      setState(() {
+        _limit += _limitIncrement;
+      });
+    }
   }
 
   void onItemMenuPress(Choice choice) {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ChatSettings()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ChatSettings()));
     }
   }
 
   void showNotification(message) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid
-          ? 'com.dfa.flutterchatdemo'
-          : 'com.duytq.flutterchatdemo',
+      Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       'your channel description',
       playSound: true,
@@ -107,15 +109,15 @@ class HomeScreenState extends State<HomeScreen> {
       priority: Priority.High,
     );
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    var platformChannelSpecifics =
+        new NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
     print(message);
 //    print(message['body'].toString());
 //    print(json.encode(message));
 
-    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
-        message['body'].toString(), platformChannelSpecifics,
+    await flutterLocalNotificationsPlugin.show(
+        0, message['title'].toString(), message['body'].toString(), platformChannelSpecifics,
         payload: json.encode(message));
 
 //    await flutterLocalNotificationsPlugin.show(
@@ -133,8 +135,7 @@ class HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding:
-                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
@@ -153,10 +154,7 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
@@ -180,8 +178,7 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -201,8 +198,7 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(
-                          color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -231,9 +227,8 @@ class HomeScreenState extends State<HomeScreen> {
       isLoading = false;
     });
 
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MyApp()),
-        (Route<dynamic> route) => false);
+    Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
   }
 
   @override
@@ -278,8 +273,7 @@ class HomeScreenState extends State<HomeScreen> {
             // List
             Container(
               child: StreamBuilder(
-                stream:
-                    FirebaseFirestore.instance.collection('users').snapshots(),
+                stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return Center(
@@ -290,9 +284,9 @@ class HomeScreenState extends State<HomeScreen> {
                   } else {
                     return ListView.builder(
                       padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) =>
-                          buildItem(context, snapshot.data.documents[index]),
+                      itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
                       itemCount: snapshot.data.documents.length,
+                      controller: listScrollController,
                     );
                   }
                 },
@@ -324,8 +318,7 @@ class HomeScreenState extends State<HomeScreen> {
                         placeholder: (context, url) => Container(
                           child: CircularProgressIndicator(
                             strokeWidth: 1.0,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(themeColor),
+                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
                           ),
                           width: 50.0,
                           height: 50.0,
@@ -382,8 +375,7 @@ class HomeScreenState extends State<HomeScreen> {
           },
           color: greyColor2,
           padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
