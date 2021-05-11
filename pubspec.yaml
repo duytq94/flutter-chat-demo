@@ -6,19 +6,18 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.3
-  firebase_core: ^0.5.0
-  firebase_auth: ^0.18.0+1
-  google_sign_in: ^4.5.3
-  cloud_firestore:  ^0.14.0+2
-  fluttertoast: ^7.0.2
-  image_picker: ^0.6.7+7
-  shared_preferences: ^0.5.10
-  firebase_storage: ^4.0.0
-  cached_network_image: ^2.3.1
-  intl: ^0.16.1
-  firebase_messaging: 7.0.0
-  flutter_local_notifications: 1.4.4+4
-  photo_view: ^0.10.2
+  firebase_core: 1.1.0
+  firebase_auth: 1.1.3
+  google_sign_in: 5.0.2
+  cloud_firestore:  2.0.0
+  fluttertoast: 8.0.6
+  image_picker: 0.7.4
+  shared_preferences: 2.0.5
+  firebase_storage: 8.0.5
+  intl: 0.17.0
+  firebase_messaging: 9.1.3
+  flutter_local_notifications: 5.0.0+4
+  photo_view: 0.11.1
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +37,7 @@ flutter:
     - images/mimi7.gif
     - images/mimi8.gif
     - images/mimi9.gif
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.0"

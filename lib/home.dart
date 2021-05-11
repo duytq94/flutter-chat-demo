@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/chat.dart';
 import 'package:flutter_chat_demo/const.dart';
+import 'package:flutter_chat_demo/model/user_chat.dart';
 import 'package:flutter_chat_demo/settings.dart';
 import 'package:flutter_chat_demo/widget/loading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -20,17 +20,17 @@ import 'main.dart';
 class HomeScreen extends StatefulWidget {
   final String currentUserId;
 
-  HomeScreen({Key key, @required this.currentUserId}) : super(key: key);
+  HomeScreen({Key? key, required this.currentUserId}) : super(key: key);
 
   @override
   State createState() => HomeScreenState(currentUserId: currentUserId);
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  HomeScreenState({Key key, @required this.currentUserId});
+  HomeScreenState({Key? key, required this.currentUserId});
 
   final String currentUserId;
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
@@ -52,17 +52,11 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void registerNotification() {
-    firebaseMessaging.requestNotificationPermissions();
+    firebaseMessaging.requestPermission();
 
-    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('onMessage: $message');
-      Platform.isAndroid ? showNotification(message['notification']) : showNotification(message['aps']['alert']);
-      return;
-    }, onResume: (Map<String, dynamic> message) {
-      print('onResume: $message');
-      return;
-    }, onLaunch: (Map<String, dynamic> message) {
-      print('onLaunch: $message');
+      showNotification(message.data);
       return;
     });
 
@@ -77,7 +71,8 @@ class HomeScreenState extends State<HomeScreen> {
   void configLocalNotification() {
     var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
+    var initializationSettings =
+        new InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -105,12 +100,12 @@ class HomeScreenState extends State<HomeScreen> {
       'your channel description',
       playSound: true,
       enableVibration: true,
-      importance: Importance.Max,
-      priority: Priority.High,
+      importance: Importance.max,
+      priority: Priority.high,
     );
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics =
-        new NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        new NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
 
     print(message);
 //    print(message['body'].toString());
@@ -210,7 +205,6 @@ class HomeScreenState extends State<HomeScreen> {
         break;
       case 1:
         exit(0);
-        break;
     }
   }
 
@@ -272,21 +266,21 @@ class HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             // List
             Container(
-              child: StreamBuilder(
+              child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      padding: EdgeInsets.all(10.0),
+                      itemBuilder: (context, index) => buildItem(context, snapshot.data!.docs[index]),
+                      itemCount: snapshot.data!.docs.length,
+                      controller: listScrollController,
+                    );
+                  } else {
                     return Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(themeColor),
                       ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                      itemCount: snapshot.data.documents.length,
-                      controller: listScrollController,
                     );
                   }
                 },
@@ -305,29 +299,43 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    if (document.data()['id'] == currentUserId) {
-      return Container();
+    UserChat userChat = UserChat.fromDocument(document);
+    if (userChat.id == currentUserId) {
+      return SizedBox.shrink();
     } else {
       return Container(
-        child: FlatButton(
+        child: TextButton(
           child: Row(
             children: <Widget>[
               Material(
-                child: document.data()['photoUrl'] != null
-                    ? CachedNetworkImage(
-                        placeholder: (context, url) => Container(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                          ),
-                          width: 50.0,
-                          height: 50.0,
-                          padding: EdgeInsets.all(15.0),
-                        ),
-                        imageUrl: document.data()['photoUrl'],
+                child: userChat.photoUrl.isNotEmpty
+                    ? Image.network(
+                        userChat.photoUrl,
+                        fit: BoxFit.cover,
                         width: 50.0,
                         height: 50.0,
-                        fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: 50,
+                            height: 50,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null &&
+                                        loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, object, stackTrace) {
+                          return Icon(
+                            Icons.account_circle,
+                            size: 50.0,
+                            color: greyColor,
+                          );
+                        },
                       )
                     : Icon(
                         Icons.account_circle,
@@ -343,7 +351,8 @@ class HomeScreenState extends State<HomeScreen> {
                     children: <Widget>[
                       Container(
                         child: Text(
-                          'Nickname: ${document.data()['nickname']}',
+                          'Nickname: ${userChat.nickname}',
+                          maxLines: 1,
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
@@ -351,7 +360,8 @@ class HomeScreenState extends State<HomeScreen> {
                       ),
                       Container(
                         child: Text(
-                          'About me: ${document.data()['aboutMe'] ?? 'Not available'}',
+                          'About me: ${userChat.aboutMe}',
+                          maxLines: 1,
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
@@ -366,16 +376,23 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Chat(
-                          peerId: document.id,
-                          peerAvatar: document.data()['photoUrl'],
-                        )));
+              context,
+              MaterialPageRoute(
+                builder: (context) => Chat(
+                  peerId: userChat.id,
+                  peerAvatar: userChat.photoUrl,
+                ),
+              ),
+            );
           },
-          color: greyColor2,
-          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
+            shape: MaterialStateProperty.all<OutlinedBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+          ),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
@@ -384,7 +401,7 @@ class HomeScreenState extends State<HomeScreen> {
 }
 
 class Choice {
-  const Choice({this.title, this.icon});
+  const Choice({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
