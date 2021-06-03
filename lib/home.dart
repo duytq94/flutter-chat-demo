@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -56,7 +55,9 @@ class HomeScreenState extends State<HomeScreen> {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('onMessage: $message');
-      showNotification(message.data);
+      if (message.notification != null) {
+        showNotification(message.notification!);
+      }
       return;
     });
 
@@ -69,10 +70,10 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void configLocalNotification() {
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings =
-        new InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings();
+    InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -93,8 +94,8 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void showNotification(message) async {
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+  void showNotification(RemoteNotification remoteNotification) async {
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       'your channel description',
@@ -103,21 +104,19 @@ class HomeScreenState extends State<HomeScreen> {
       importance: Importance.max,
       priority: Priority.high,
     );
-    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics =
-        new NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+    IOSNotificationDetails iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
 
-    print(message);
-//    print(message['body'].toString());
-//    print(json.encode(message));
+    print(remoteNotification);
 
     await flutterLocalNotificationsPlugin.show(
-        0, message['title'].toString(), message['body'].toString(), platformChannelSpecifics,
-        payload: json.encode(message));
-
-//    await flutterLocalNotificationsPlugin.show(
-//        0, 'plain title', 'plain body', platformChannelSpecifics,
-//        payload: 'item x');
+      0,
+      remoteNotification.title,
+      remoteNotification.body,
+      platformChannelSpecifics,
+      payload: null,
+    );
   }
 
   Future<bool> onBackPress() {
@@ -272,8 +271,8 @@ class HomeScreenState extends State<HomeScreen> {
                   if (snapshot.hasData) {
                     return ListView.builder(
                       padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) => buildItem(context, snapshot.data!.docs[index]),
-                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
+                      itemCount: snapshot.data?.docs.length,
                       controller: listScrollController,
                     );
                   } else {
@@ -298,104 +297,108 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    UserChat userChat = UserChat.fromDocument(document);
-    if (userChat.id == currentUserId) {
-      return SizedBox.shrink();
-    } else {
-      return Container(
-        child: TextButton(
-          child: Row(
-            children: <Widget>[
-              Material(
-                child: userChat.photoUrl.isNotEmpty
-                    ? Image.network(
-                        userChat.photoUrl,
-                        fit: BoxFit.cover,
-                        width: 50.0,
-                        height: 50.0,
-                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            width: 50,
-                            height: 50,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null &&
-                                        loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                    : null,
+  Widget buildItem(BuildContext context, DocumentSnapshot? document) {
+    if (document != null) {
+      UserChat userChat = UserChat.fromDocument(document);
+      if (userChat.id == currentUserId) {
+        return SizedBox.shrink();
+      } else {
+        return Container(
+          child: TextButton(
+            child: Row(
+              children: <Widget>[
+                Material(
+                  child: userChat.photoUrl.isNotEmpty
+                      ? Image.network(
+                          userChat.photoUrl,
+                          fit: BoxFit.cover,
+                          width: 50.0,
+                          height: 50.0,
+                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              width: 50,
+                              height: 50,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null &&
+                                          loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 50.0,
-                            color: greyColor,
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50.0,
-                        color: greyColor,
-                      ),
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                clipBehavior: Clip.hardEdge,
-              ),
-              Flexible(
-                child: Container(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          'Nickname: ${userChat.nickname}',
-                          maxLines: 1,
-                          style: TextStyle(color: primaryColor),
+                            );
+                          },
+                          errorBuilder: (context, object, stackTrace) {
+                            return Icon(
+                              Icons.account_circle,
+                              size: 50.0,
+                              color: greyColor,
+                            );
+                          },
+                        )
+                      : Icon(
+                          Icons.account_circle,
+                          size: 50.0,
+                          color: greyColor,
                         ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                      ),
-                      Container(
-                        child: Text(
-                          'About me: ${userChat.aboutMe}',
-                          maxLines: 1,
-                          style: TextStyle(color: primaryColor),
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  clipBehavior: Clip.hardEdge,
+                ),
+                Flexible(
+                  child: Container(
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          child: Text(
+                            'Nickname: ${userChat.nickname}',
+                            maxLines: 1,
+                            style: TextStyle(color: primaryColor),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                         ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                      )
-                    ],
+                        Container(
+                          child: Text(
+                            'About me: ${userChat.aboutMe}',
+                            maxLines: 1,
+                            style: TextStyle(color: primaryColor),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                        )
+                      ],
+                    ),
+                    margin: EdgeInsets.only(left: 20.0),
                   ),
-                  margin: EdgeInsets.only(left: 20.0),
                 ),
-              ),
-            ],
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Chat(
-                  peerId: userChat.id,
-                  peerAvatar: userChat.photoUrl,
+              ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Chat(
+                    peerId: userChat.id,
+                    peerAvatar: userChat.photoUrl,
+                  ),
                 ),
-              ),
-            );
-          },
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
-            shape: MaterialStateProperty.all<OutlinedBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+              );
+            },
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
+              shape: MaterialStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
               ),
             ),
           ),
-        ),
-        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
-      );
+          margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+        );
+      }
+    } else {
+      return SizedBox.shrink();
     }
   }
 }

@@ -133,7 +133,7 @@ class LoginScreenState extends State<LoginScreen> {
             Center(
               child: TextButton(
                 onPressed: () => handleSignIn().catchError((err) {
-                  Fluttertoast.showToast(msg: "Sign in fail");
+                  Fluttertoast.showToast(msg: err.toString());
                   this.setState(() {
                     isLoading = false;
                   });
