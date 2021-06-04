@@ -278,7 +278,7 @@ class HomeScreenState extends State<HomeScreen> {
                   } else {
                     return Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                       ),
                     );
                   }
@@ -321,6 +321,7 @@ class HomeScreenState extends State<HomeScreen> {
                               height: 50,
                               child: Center(
                                 child: CircularProgressIndicator(
+                                  color: primaryColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!

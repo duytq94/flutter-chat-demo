@@ -219,6 +219,7 @@ class ChatScreenState extends State<ChatScreen> {
                                   height: 200.0,
                                   child: Center(
                                     child: CircularProgressIndicator(
+                                      color: primaryColor,
                                       value: loadingProgress.expectedTotalBytes != null &&
                                               loadingProgress.expectedTotalBytes != null
                                           ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -290,6 +291,7 @@ class ChatScreenState extends State<ChatScreen> {
                               if (loadingProgress == null) return child;
                               return Center(
                                 child: CircularProgressIndicator(
+                                  color: primaryColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -345,6 +347,7 @@ class ChatScreenState extends State<ChatScreen> {
                                         height: 200.0,
                                         child: Center(
                                           child: CircularProgressIndicator(
+                                            color: primaryColor,
                                             value: loadingProgress.expectedTotalBytes != null &&
                                                     loadingProgress.expectedTotalBytes != null
                                                 ? loadingProgress.cumulativeBytesLoaded /
@@ -677,7 +680,7 @@ class ChatScreenState extends State<ChatScreen> {
                 } else {
                   return Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                     ),
                   );
                 }
@@ -685,7 +688,7 @@ class ChatScreenState extends State<ChatScreen> {
             )
           : Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               ),
             ),
     );

@@ -69,7 +69,9 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Future getImage() async {
     ImagePicker imagePicker = ImagePicker();
-    PickedFile? pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
+    PickedFile? pickedFile = await imagePicker.getImage(source: ImageSource.gallery).catchError((err) {
+      Fluttertoast.showToast(msg: err.toString());
+    });
     File? image;
     if (pickedFile != null) {
       image = File(pickedFile.path);
