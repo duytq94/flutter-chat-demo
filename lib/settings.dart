@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +31,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  TextEditingController controllerNickname;
-  TextEditingController controllerAboutMe;
+  TextEditingController? controllerNickname;
+  TextEditingController? controllerAboutMe;
 
-  SharedPreferences prefs;
+  SharedPreferences? prefs;
 
   String id = '';
   String nickname = '';
@@ -43,7 +42,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   String photoUrl = '';
 
   bool isLoading = false;
-  File avatarImageFile;
+  File? avatarImageFile;
 
   final FocusNode focusNodeNickname = FocusNode();
   final FocusNode focusNodeAboutMe = FocusNode();
@@ -56,10 +55,10 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   void readLocal() async {
     prefs = await SharedPreferences.getInstance();
-    id = prefs.getString('id') ?? '';
-    nickname = prefs.getString('nickname') ?? '';
-    aboutMe = prefs.getString('aboutMe') ?? '';
-    photoUrl = prefs.getString('photoUrl') ?? '';
+    id = prefs?.getString('id') ?? '';
+    nickname = prefs?.getString('nickname') ?? '';
+    aboutMe = prefs?.getString('aboutMe') ?? '';
+    photoUrl = prefs?.getString('photoUrl') ?? '';
 
     controllerNickname = TextEditingController(text: nickname);
     controllerAboutMe = TextEditingController(text: aboutMe);
@@ -70,65 +69,50 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Future getImage() async {
     ImagePicker imagePicker = ImagePicker();
-    PickedFile pickedFile;
-
-    pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
-
-    File image = File(pickedFile.path);
-
+    PickedFile? pickedFile = await imagePicker.getImage(source: ImageSource.gallery).catchError((err) {
+      Fluttertoast.showToast(msg: err.toString());
+    });
+    File? image;
+    if (pickedFile != null) {
+      image = File(pickedFile.path);
+    }
     if (image != null) {
       setState(() {
         avatarImageFile = image;
         isLoading = true;
       });
+      uploadFile();
     }
-    uploadFile();
   }
 
   Future uploadFile() async {
     String fileName = id;
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(avatarImageFile);
-    StorageTaskSnapshot storageTaskSnapshot;
-    uploadTask.onComplete.then((value) {
-      if (value.error == null) {
-        storageTaskSnapshot = value;
-        storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
-          photoUrl = downloadUrl;
-          FirebaseFirestore.instance.collection('users').doc(id).update({
-            'nickname': nickname,
-            'aboutMe': aboutMe,
-            'photoUrl': photoUrl
-          }).then((data) async {
-            await prefs.setString('photoUrl', photoUrl);
-            setState(() {
-              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: "Upload success");
-          }).catchError((err) {
-            setState(() {
-              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: err.toString());
-          });
-        }, onError: (err) {
-          setState(() {
-            isLoading = false;
-          });
-          Fluttertoast.showToast(msg: 'This file is not an image');
-        });
-      } else {
+    Reference reference = FirebaseStorage.instance.ref().child(fileName);
+    UploadTask uploadTask = reference.putFile(avatarImageFile!);
+    try {
+      TaskSnapshot snapshot = await uploadTask;
+      photoUrl = await snapshot.ref.getDownloadURL();
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(id)
+          .update({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+        await prefs?.setString('photoUrl', photoUrl);
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: 'This file is not an image');
-      }
-    }, onError: (err) {
+        Fluttertoast.showToast(msg: "Upload success");
+      }).catchError((err) {
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(msg: err.toString());
+      });
+    } on FirebaseException catch (e) {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: err.toString());
-    });
+      Fluttertoast.showToast(msg: e.message ?? e.toString());
+    }
   }
 
   void handleUpdateData() {
@@ -139,14 +123,13 @@ class SettingsScreenState extends State<SettingsScreen> {
       isLoading = true;
     });
 
-    FirebaseFirestore.instance.collection('users').doc(id).update({
-      'nickname': nickname,
-      'aboutMe': aboutMe,
-      'photoUrl': photoUrl
-    }).then((data) async {
-      await prefs.setString('nickname', nickname);
-      await prefs.setString('aboutMe', aboutMe);
-      await prefs.setString('photoUrl', photoUrl);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(id)
+        .update({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+      await prefs?.setString('nickname', nickname);
+      await prefs?.setString('aboutMe', aboutMe);
+      await prefs?.setString('photoUrl', photoUrl);
 
       setState(() {
         isLoading = false;
@@ -174,44 +157,55 @@ class SettingsScreenState extends State<SettingsScreen> {
                 child: Center(
                   child: Stack(
                     children: <Widget>[
-                      (avatarImageFile == null)
-                          ? (photoUrl != ''
+                      avatarImageFile == null
+                          ? photoUrl.isNotEmpty
                               ? Material(
-                                  child: CachedNetworkImage(
-                                    placeholder: (context, url) => Container(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.0,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                themeColor),
-                                      ),
-                                      width: 90.0,
-                                      height: 90.0,
-                                      padding: EdgeInsets.all(20.0),
-                                    ),
-                                    imageUrl: photoUrl,
+                                  child: Image.network(
+                                    photoUrl,
+                                    fit: BoxFit.cover,
                                     width: 90.0,
                                     height: 90.0,
-                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, object, stackTrace) {
+                                      return Icon(
+                                        Icons.account_circle,
+                                        size: 90.0,
+                                        color: greyColor,
+                                      );
+                                    },
+                                    loadingBuilder:
+                                        (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        width: 90.0,
+                                        height: 90.0,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null &&
+                                                    loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded /
+                                                    loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(45.0)),
+                                  borderRadius: BorderRadius.all(Radius.circular(45.0)),
                                   clipBehavior: Clip.hardEdge,
                                 )
                               : Icon(
                                   Icons.account_circle,
                                   size: 90.0,
                                   color: greyColor,
-                                ))
+                                )
                           : Material(
                               child: Image.file(
-                                avatarImageFile,
+                                avatarImageFile!,
                                 width: 90.0,
                                 height: 90.0,
                                 fit: BoxFit.cover,
                               ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(45.0)),
+                              borderRadius: BorderRadius.all(Radius.circular(45.0)),
                               clipBehavior: Clip.hardEdge,
                             ),
                       IconButton(
@@ -239,17 +233,13 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'Nickname',
-                      style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
                   ),
                   Container(
                     child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(primaryColor: primaryColor),
+                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Sweetie',
@@ -270,17 +260,13 @@ class SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     child: Text(
                       'About me',
-                      style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
                   ),
                   Container(
                     child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(primaryColor: primaryColor),
+                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Fun, like travel and play PES...',
@@ -302,17 +288,18 @@ class SettingsScreenState extends State<SettingsScreen> {
 
               // Button
               Container(
-                child: FlatButton(
+                child: TextButton(
                   onPressed: handleUpdateData,
                   child: Text(
                     'UPDATE',
-                    style: TextStyle(fontSize: 16.0),
+                    style: TextStyle(fontSize: 16.0, color: Colors.white),
                   ),
-                  color: primaryColor,
-                  highlightColor: Color(0xff8d93a0),
-                  splashColor: Colors.transparent,
-                  textColor: Colors.white,
-                  padding: EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 10.0),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                      EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 10.0),
+                    ),
+                  ),
                 ),
                 margin: EdgeInsets.only(top: 50.0, bottom: 50.0),
               ),
@@ -326,8 +313,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
+                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )
