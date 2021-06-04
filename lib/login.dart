@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/const.dart';
 import 'package:flutter_chat_demo/home.dart';
+import 'package:flutter_chat_demo/model/user_chat.dart';
 import 'package:flutter_chat_demo/widget/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -92,11 +93,13 @@ class LoginScreenState extends State<LoginScreen> {
           await prefs?.setString('nickname', currentUser!.displayName ?? "");
           await prefs?.setString('photoUrl', currentUser!.photoURL ?? "");
         } else {
+          DocumentSnapshot documentSnapshot = documents[0];
+          UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
-          await prefs?.setString('id', documents[0].get('id'));
-          await prefs?.setString('nickname', documents[0].get('nickname'));
-          await prefs?.setString('photoUrl', documents[0].get('photoUrl'));
-          await prefs?.setString('aboutMe', documents[0].get('aboutMe'));
+          await prefs?.setString('id', userChat.id);
+          await prefs?.setString('nickname', userChat.nickname);
+          await prefs?.setString('photoUrl', userChat.photoUrl);
+          await prefs?.setString('aboutMe', userChat.aboutMe);
         }
         Fluttertoast.showToast(msg: "Sign in success");
         this.setState(() {

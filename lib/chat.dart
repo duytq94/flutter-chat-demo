@@ -209,6 +209,12 @@ class ChatScreenState extends State<ChatScreen> {
                               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return Container(
+                                  decoration: BoxDecoration(
+                                    color: greyColor2,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
                                   width: 200.0,
                                   height: 200.0,
                                   child: Center(
@@ -328,13 +334,23 @@ class ChatScreenState extends State<ChatScreen> {
                                     loadingBuilder:
                                         (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                       if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null &&
-                                                  loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded /
-                                                  loadingProgress.expectedTotalBytes!
-                                              : null,
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: greyColor2,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(8.0),
+                                          ),
+                                        ),
+                                        width: 200.0,
+                                        height: 200.0,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null &&
+                                                    loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded /
+                                                    loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
                                         ),
                                       );
                                     },

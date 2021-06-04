@@ -8,15 +8,6 @@ class UserChat {
 
   UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe});
 
-  factory UserChat.fromJson(dynamic json) {
-    return UserChat(
-      id: "",
-      photoUrl: json['photoUrl'],
-      nickname: json['nickname'],
-      aboutMe: json['aboutMe'],
-    );
-  }
-
   factory UserChat.fromDocument(DocumentSnapshot doc) {
     String aboutMe = "";
     String photoUrl = "";
@@ -36,9 +27,5 @@ class UserChat {
       nickname: nickname,
       aboutMe: aboutMe,
     );
-  }
-
-  Map<String, String?> toJson() {
-    return {'photoUrl': this.photoUrl, 'nickname': this.nickname, 'aboutMe': this.aboutMe};
   }
 }
