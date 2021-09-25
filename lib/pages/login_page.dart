@@ -3,24 +3,24 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/const.dart';
-import 'package:flutter_chat_demo/home.dart';
-import 'package:flutter_chat_demo/model/user_chat.dart';
-import 'package:flutter_chat_demo/widget/loading.dart';
+import 'package:flutter_chat_demo/constants/app_constants.dart';
+import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginScreen extends StatefulWidget {
-  LoginScreen({Key? key, required this.title}) : super(key: key);
+import '../models/models.dart';
+import '../widgets/widgets.dart';
+import 'pages.dart';
 
-  final String title;
+class LoginPage extends StatefulWidget {
+  LoginPage({Key? key}) : super(key: key);
 
   @override
-  LoginScreenState createState() => LoginScreenState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class LoginPageState extends State<LoginPage> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   SharedPreferences? prefs;
@@ -46,7 +46,7 @@ class LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn && prefs?.getString('id') != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: prefs!.getString('id') ?? "")),
+        MaterialPageRoute(builder: (context) => HomePage(currentUserId: prefs!.getString('id') ?? "")),
       );
     }
 
@@ -106,7 +106,7 @@ class LoginScreenState extends State<LoginScreen> {
           isLoading = false;
         });
 
-        Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: firebaseUser.uid)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(currentUserId: firebaseUser.uid)));
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
         this.setState(() {
@@ -126,8 +126,8 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.title,
-            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+            AppConstants.loginTitle,
+            style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
         ),

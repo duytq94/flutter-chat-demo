@@ -5,28 +5,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/chat.dart';
-import 'package:flutter_chat_demo/const.dart';
-import 'package:flutter_chat_demo/model/user_chat.dart';
-import 'package:flutter_chat_demo/settings.dart';
-import 'package:flutter_chat_demo/widget/loading.dart';
+import 'package:flutter_chat_demo/constants/app_constants.dart';
+import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'main.dart';
+import '../main.dart';
+import '../models/models.dart';
+import '../widgets/widgets.dart';
+import 'pages.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final String currentUserId;
 
-  HomeScreen({Key? key, required this.currentUserId}) : super(key: key);
+  HomePage({Key? key, required this.currentUserId}) : super(key: key);
 
   @override
-  State createState() => HomeScreenState(currentUserId: currentUserId);
+  State createState() => HomePageState(currentUserId: currentUserId);
 }
 
-class HomeScreenState extends State<HomeScreen> {
-  HomeScreenState({Key? key, required this.currentUserId});
+class HomePageState extends State<HomePage> {
+  HomePageState({Key? key, required this.currentUserId});
 
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
@@ -90,7 +90,7 @@ class HomeScreenState extends State<HomeScreen> {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ChatSettings()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
     }
   }
 
@@ -132,7 +132,7 @@ class HomeScreenState extends State<HomeScreen> {
             contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
-                color: themeColor,
+                color: ColorConstants.themeColor,
                 margin: EdgeInsets.all(0.0),
                 padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
                 height: 100.0,
@@ -166,13 +166,13 @@ class HomeScreenState extends State<HomeScreen> {
                     Container(
                       child: Icon(
                         Icons.cancel,
-                        color: primaryColor,
+                        color: ColorConstants.primaryColor,
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -186,13 +186,13 @@ class HomeScreenState extends State<HomeScreen> {
                     Container(
                       child: Icon(
                         Icons.check_circle,
-                        color: primaryColor,
+                        color: ColorConstants.primaryColor,
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -229,8 +229,8 @@ class HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'MAIN',
-          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          AppConstants.homeTitle,
+          style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: <Widget>[
@@ -244,14 +244,14 @@ class HomeScreenState extends State<HomeScreen> {
                       children: <Widget>[
                         Icon(
                           choice.icon,
-                          color: primaryColor,
+                          color: ColorConstants.primaryColor,
                         ),
                         Container(
                           width: 10.0,
                         ),
                         Text(
                           choice.title,
-                          style: TextStyle(color: primaryColor),
+                          style: TextStyle(color: ColorConstants.primaryColor),
                         ),
                       ],
                     ));
@@ -278,7 +278,7 @@ class HomeScreenState extends State<HomeScreen> {
                   } else {
                     return Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.primaryColor),
                       ),
                     );
                   }
@@ -321,7 +321,7 @@ class HomeScreenState extends State<HomeScreen> {
                               height: 50,
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  color: primaryColor,
+                                  color: ColorConstants.primaryColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -334,14 +334,14 @@ class HomeScreenState extends State<HomeScreen> {
                             return Icon(
                               Icons.account_circle,
                               size: 50.0,
-                              color: greyColor,
+                              color: ColorConstants.greyColor,
                             );
                           },
                         )
                       : Icon(
                           Icons.account_circle,
                           size: 50.0,
-                          color: greyColor,
+                          color: ColorConstants.greyColor,
                         ),
                   borderRadius: BorderRadius.all(Radius.circular(25.0)),
                   clipBehavior: Clip.hardEdge,
@@ -354,7 +354,7 @@ class HomeScreenState extends State<HomeScreen> {
                           child: Text(
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
-                            style: TextStyle(color: primaryColor),
+                            style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
@@ -363,7 +363,7 @@ class HomeScreenState extends State<HomeScreen> {
                           child: Text(
                             'About me: ${userChat.aboutMe}',
                             maxLines: 1,
-                            style: TextStyle(color: primaryColor),
+                            style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
@@ -379,7 +379,7 @@ class HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Chat(
+                  builder: (context) => ChatPage(
                     peerId: userChat.id,
                     peerAvatar: userChat.photoUrl,
                   ),
@@ -387,7 +387,7 @@ class HomeScreenState extends State<HomeScreen> {
               );
             },
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(greyColor2),
+              backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
               shape: MaterialStateProperty.all<OutlinedBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
