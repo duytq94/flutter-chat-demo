@@ -36,7 +36,6 @@ class AuthProvider {
       User? firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
-        // Check is already sign up
         final QuerySnapshot result =
             await FirebaseFirestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).get();
         final List<DocumentSnapshot> documents = result.docs;
@@ -50,12 +49,13 @@ class AuthProvider {
             'chattingWith': null
           });
 
-          // Write data to local
+          // Write data to local storage
           User? currentUser = firebaseUser;
           await prefs.setString('id', currentUser.uid);
           await prefs.setString('nickname', currentUser.displayName ?? "");
           await prefs.setString('photoUrl', currentUser.photoURL ?? "");
         } else {
+          // Already sign up, just get data from firestore
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local

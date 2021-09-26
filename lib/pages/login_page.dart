@@ -1,12 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -19,13 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  SharedPreferences? prefs;
-
   bool isLoading = false;
-  bool isLoggedIn = false;
-  User? currentUser;
 
   void onPressSignIn() {
     this.setState(() {
@@ -63,11 +54,17 @@ class LoginPageState extends State<LoginPage> {
               child: TextButton(
                 onPressed: onPressSignIn,
                 child: Text(
-                  'SIGN IN WITH GOOGLE',
+                  'Sign in with Google',
                   style: TextStyle(fontSize: 16.0, color: Colors.white),
                 ),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Color(0xffdd4b39)),
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.pressed)) return Color(0xffdd4b39).withOpacity(0.8);
+                      return Color(0xffdd4b39);
+                    },
+                  ),
+                  splashFactory: NoSplash.splashFactory,
                   padding: MaterialStateProperty.all<EdgeInsets>(
                     EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0),
                   ),
