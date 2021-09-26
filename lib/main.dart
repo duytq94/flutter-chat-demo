@@ -1,6 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
+import 'package:flutter_chat_demo/providers/auth_provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants/color_constants.dart';
 import 'pages/pages.dart';
@@ -8,19 +13,35 @@ import 'pages/pages.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  runApp(MyApp(prefs: prefs));
 }
 
 class MyApp extends StatelessWidget {
+  final SharedPreferences prefs;
+
+  MyApp({required this.prefs});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appTitle,
-      theme: ThemeData(
-        primaryColor: ColorConstants.themeColor,
+    return MultiProvider(
+      providers: [
+        Provider<AuthProvider>(
+          create: (_) => AuthProvider(
+            firebaseAuth: FirebaseAuth.instance,
+            googleSignIn: GoogleSignIn(),
+            prefs: this.prefs,
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appTitle,
+        theme: ThemeData(
+          primaryColor: ColorConstants.themeColor,
+        ),
+        home: SplashPage(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: LoginPage(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

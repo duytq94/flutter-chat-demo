@@ -181,6 +181,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                                         height: 90.0,
                                         child: Center(
                                           child: CircularProgressIndicator(
+                                            color: ColorConstants.themeColor,
                                             value: loadingProgress.expectedTotalBytes != null &&
                                                     loadingProgress.expectedTotalBytes != null
                                                 ? loadingProgress.cumulativeBytesLoaded /
@@ -316,12 +317,13 @@ class SettingsPageStateState extends State<SettingsPageState> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child:
-                        CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.themeColor)),
+                    child: CircularProgressIndicator(
+                      color: ColorConstants.themeColor,
+                    ),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )
-              : Container(),
+              : SizedBox.shrink(),
         ),
       ],
     );

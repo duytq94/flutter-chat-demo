@@ -198,7 +198,7 @@ class ChatPageState extends State<ChatPage> {
                                   height: 200.0,
                                   child: Center(
                                     child: CircularProgressIndicator(
-                                      color: ColorConstants.primaryColor,
+                                      color: ColorConstants.themeColor,
                                       value: loadingProgress.expectedTotalBytes != null &&
                                               loadingProgress.expectedTotalBytes != null
                                           ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -270,7 +270,7 @@ class ChatPageState extends State<ChatPage> {
                               if (loadingProgress == null) return child;
                               return Center(
                                 child: CircularProgressIndicator(
-                                  color: ColorConstants.primaryColor,
+                                  color: ColorConstants.themeColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -327,7 +327,7 @@ class ChatPageState extends State<ChatPage> {
                                         height: 200.0,
                                         child: Center(
                                           child: CircularProgressIndicator(
-                                            color: ColorConstants.primaryColor,
+                                            color: ColorConstants.themeColor,
                                             value: loadingProgress.expectedTotalBytes != null &&
                                                     loadingProgress.expectedTotalBytes != null
                                                 ? loadingProgress.cumulativeBytesLoaded /
@@ -388,7 +388,7 @@ class ChatPageState extends State<ChatPage> {
                       ),
                       margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
                     )
-                  : Container()
+                  : SizedBox.shrink()
             ],
             crossAxisAlignment: CrossAxisAlignment.start,
           ),
@@ -448,7 +448,7 @@ class ChatPageState extends State<ChatPage> {
                 buildListMessage(),
 
                 // Sticker
-                isShowSticker ? buildSticker() : Container(),
+                isShowSticker ? buildSticker() : SizedBox.shrink(),
 
                 // Input content
                 buildInput(),
@@ -578,7 +578,7 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildLoading() {
     return Positioned(
-      child: isLoading ? const Loading() : Container(),
+      child: isLoading ? const LoadingView() : SizedBox.shrink(),
     );
   }
 
@@ -673,7 +673,7 @@ class ChatPageState extends State<ChatPage> {
                 } else {
                   return Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.primaryColor),
+                      color: ColorConstants.themeColor,
                     ),
                   );
                 }
@@ -681,7 +681,7 @@ class ChatPageState extends State<ChatPage> {
             )
           : Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.primaryColor),
+                color: ColorConstants.themeColor,
               ),
             ),
     );

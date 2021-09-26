@@ -11,7 +11,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../main.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -220,8 +219,10 @@ class HomePageState extends State<HomePage> {
       isLoading = false;
     });
 
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -278,7 +279,7 @@ class HomePageState extends State<HomePage> {
                   } else {
                     return Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.primaryColor),
+                        color: ColorConstants.themeColor,
                       ),
                     );
                   }
@@ -288,7 +289,7 @@ class HomePageState extends State<HomePage> {
 
             // Loading
             Positioned(
-              child: isLoading ? const Loading() : Container(),
+              child: isLoading ? const LoadingView() : SizedBox.shrink(),
             )
           ],
         ),
@@ -321,7 +322,7 @@ class HomePageState extends State<HomePage> {
                               height: 50,
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  color: ColorConstants.primaryColor,
+                                  color: ColorConstants.themeColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
