@@ -26,14 +26,11 @@ class SplashPageState extends State<SplashPage> {
     AuthProvider authProvider = context.read<AuthProvider>();
     bool isLoggedIn = await authProvider.isLoggedIn();
     if (isLoggedIn) {
-      String userFirebaseId = authProvider.getUserFirebaseId() ?? "";
-      if (userFirebaseId.isNotEmpty == true) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage(currentUserId: userFirebaseId)),
-        );
-        return;
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+      return;
     }
     Navigator.pushReplacement(
       context,

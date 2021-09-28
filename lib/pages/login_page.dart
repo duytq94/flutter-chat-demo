@@ -16,30 +16,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  bool isLoading = false;
-
-  void onPressSignIn() {
-    this.setState(() {
-      isLoading = true;
-    });
-    context.read<AuthProvider>().handleSignIn().then((firebaseUser) {
-      Fluttertoast.showToast(msg: "Sign in success");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(currentUserId: firebaseUser.uid),
-        ),
-      );
-    }).catchError((err) {
-      Fluttertoast.showToast(msg: err.toString());
-      this.setState(() {
-        isLoading = false;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    switch (authProvider.status) {
+      case Status.authenticateError:
+        Fluttertoast.showToast(msg: "Sign in fail");
+        break;
+      case Status.authenticateCanceled:
+        Fluttertoast.showToast(msg: "Sign in canceled");
+        break;
+      case Status.authenticated:
+        Fluttertoast.showToast(msg: "Sign in success");
+        break;
+      default:
+        break;
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -52,7 +44,17 @@ class LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Center(
               child: TextButton(
-                onPressed: onPressSignIn,
+                onPressed: () async {
+                  bool isSuccess = await authProvider.handleSignIn();
+                  if (isSuccess) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(),
+                      ),
+                    );
+                  }
+                },
                 child: Text(
                   'Sign in with Google',
                   style: TextStyle(fontSize: 16.0, color: Colors.white),
@@ -73,7 +75,7 @@ class LoginPageState extends State<LoginPage> {
             ),
             // Loading
             Positioned(
-              child: isLoading ? LoadingView() : SizedBox.shrink(),
+              child: authProvider.status == Status.authenticating ? LoadingView() : SizedBox.shrink(),
             ),
           ],
         ));

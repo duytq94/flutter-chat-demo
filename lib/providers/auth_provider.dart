@@ -1,15 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthProvider {
+enum Status {
+  uninitialized,
+  authenticated,
+  authenticating,
+  authenticateError,
+  authenticateCanceled,
+}
+
+class AuthProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn;
   final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firebaseFirestore;
   final SharedPreferences prefs;
 
-  AuthProvider({required this.firebaseAuth, required this.googleSignIn, required this.prefs});
+  Status _status = Status.uninitialized;
+
+  Status get status => _status;
+
+  AuthProvider({
+    required this.firebaseAuth,
+    required this.googleSignIn,
+    required this.prefs,
+    required this.firebaseFirestore,
+  });
 
   String? getUserFirebaseId() {
     return prefs.getString('id');
@@ -17,14 +36,17 @@ class AuthProvider {
 
   Future<bool> isLoggedIn() async {
     bool isLoggedIn = await googleSignIn.isSignedIn();
-    if (isLoggedIn && prefs.getString('id') != null) {
+    if (isLoggedIn && prefs.getString('id')?.isNotEmpty == true) {
       return true;
     } else {
       return false;
     }
   }
 
-  Future<User> handleSignIn() async {
+  Future<bool> handleSignIn() async {
+    _status = Status.authenticating;
+    notifyListeners();
+
     GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
       GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
@@ -37,11 +59,11 @@ class AuthProvider {
 
       if (firebaseUser != null) {
         final QuerySnapshot result =
-            await FirebaseFirestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).get();
+            await firebaseFirestore.collection('users').where('id', isEqualTo: firebaseUser.uid).get();
         final List<DocumentSnapshot> documents = result.docs;
         if (documents.length == 0) {
           // Writing data to server because here is a new user
-          FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
+          firebaseFirestore.collection('users').doc(firebaseUser.uid).set({
             'nickname': firebaseUser.displayName,
             'photoUrl': firebaseUser.photoURL,
             'id': firebaseUser.uid,
@@ -64,12 +86,25 @@ class AuthProvider {
           await prefs.setString('photoUrl', userChat.photoUrl);
           await prefs.setString('aboutMe', userChat.aboutMe);
         }
-        return firebaseUser;
+        _status = Status.authenticated;
+        notifyListeners();
+        return true;
       } else {
-        throw "Can not get firebase user";
+        _status = Status.authenticateError;
+        notifyListeners();
+        return false;
       }
     } else {
-      throw "Can not init google sign in";
+      _status = Status.authenticateCanceled;
+      notifyListeners();
+      return false;
     }
+  }
+
+  Future<void> handleSignOut() async {
+    _status = Status.uninitialized;
+    await firebaseAuth.signOut();
+    await googleSignIn.disconnect();
+    await googleSignIn.signOut();
   }
 }

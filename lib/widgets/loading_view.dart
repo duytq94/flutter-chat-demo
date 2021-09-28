@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../constants/color_constants.dart';
 
 class LoadingView extends StatelessWidget {
-  const LoadingView();
-
   @override
   Widget build(BuildContext context) {
     return Container(

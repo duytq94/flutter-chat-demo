@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -26,13 +27,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthProvider>(
+        ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(
             firebaseAuth: FirebaseAuth.instance,
             googleSignIn: GoogleSignIn(),
             prefs: this.prefs,
+            firebaseFirestore: FirebaseFirestore.instance,
           ),
         ),
+
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,

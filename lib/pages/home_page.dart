@@ -2,32 +2,30 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
 class HomePage extends StatefulWidget {
-  final String currentUserId;
-
-  HomePage({Key? key, required this.currentUserId}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
-  State createState() => HomePageState(currentUserId: currentUserId);
+  State createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  HomePageState({Key? key, required this.currentUserId});
+  HomePageState({Key? key});
 
-  final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -40,10 +38,21 @@ class HomePageState extends State<HomePage> {
     const Choice(title: 'Settings', icon: Icons.settings),
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
   ];
+  late AuthProvider authProvider;
+  late String currentUserId;
 
   @override
   void initState() {
     super.initState();
+    authProvider = context.read<AuthProvider>();
+    if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
+      currentUserId = authProvider.getUserFirebaseId()!;
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+        (Route<dynamic> route) => false,
+      );
+    }
     registerNotification();
     configLocalNotification();
     listScrollController.addListener(scrollListener);
@@ -206,19 +215,8 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  Future<Null> handleSignOut() async {
-    this.setState(() {
-      isLoading = true;
-    });
-
-    await FirebaseAuth.instance.signOut();
-    await googleSignIn.disconnect();
-    await googleSignIn.signOut();
-
-    this.setState(() {
-      isLoading = false;
-    });
-
+  Future<void> handleSignOut() async {
+    authProvider.handleSignOut();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginPage()),
       (Route<dynamic> route) => false,
@@ -234,32 +232,7 @@ class HomePageState extends State<HomePage> {
           style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        actions: <Widget>[
-          PopupMenuButton<Choice>(
-            onSelected: onItemMenuPress,
-            itemBuilder: (BuildContext context) {
-              return choices.map((Choice choice) {
-                return PopupMenuItem<Choice>(
-                    value: choice,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          choice.icon,
-                          color: ColorConstants.primaryColor,
-                        ),
-                        Container(
-                          width: 10.0,
-                        ),
-                        Text(
-                          choice.title,
-                          style: TextStyle(color: ColorConstants.primaryColor),
-                        ),
-                      ],
-                    ));
-              }).toList();
-            },
-          ),
-        ],
+        actions: <Widget>[buildPopupMenu()],
       ),
       body: WillPopScope(
         child: Stack(
@@ -289,12 +262,39 @@ class HomePageState extends State<HomePage> {
 
             // Loading
             Positioned(
-              child: isLoading ? const LoadingView() : SizedBox.shrink(),
+              child: isLoading ? LoadingView() : SizedBox.shrink(),
             )
           ],
         ),
         onWillPop: onBackPress,
       ),
+    );
+  }
+
+  Widget buildPopupMenu() {
+    return PopupMenuButton<Choice>(
+      onSelected: onItemMenuPress,
+      itemBuilder: (BuildContext context) {
+        return choices.map((Choice choice) {
+          return PopupMenuItem<Choice>(
+              value: choice,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    choice.icon,
+                    color: ColorConstants.primaryColor,
+                  ),
+                  Container(
+                    width: 10.0,
+                  ),
+                  Text(
+                    choice.title,
+                    style: TextStyle(color: ColorConstants.primaryColor),
+                  ),
+                ],
+              ));
+        }).toList();
+      },
     );
   }
 

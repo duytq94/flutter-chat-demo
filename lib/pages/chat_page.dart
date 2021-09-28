@@ -578,7 +578,7 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildLoading() {
     return Positioned(
-      child: isLoading ? const LoadingView() : SizedBox.shrink(),
+      child: isLoading ? LoadingView() : SizedBox.shrink(),
     );
   }
 
