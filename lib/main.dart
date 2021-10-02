@@ -51,6 +51,13 @@ class MyApp extends StatelessWidget {
             firebaseFirestore: this.firebaseFirestore,
           ),
         ),
+        Provider<ChatProvider>(
+          create: (_) => ChatProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this.firebaseFirestore,
+            firebaseStorage: this.firebaseStorage,
+          ),
+        ),
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,

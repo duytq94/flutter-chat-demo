@@ -149,8 +149,8 @@ class HomePageState extends State<HomePage> {
               Container(
                 color: ColorConstants.themeColor,
                 padding: EdgeInsets.only(bottom: 10, top: 10),
-                height: 100,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Container(
                       child: Icon(

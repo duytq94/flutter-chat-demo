@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
+import 'package:flutter_chat_demo/models/models.dart';
+import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -30,13 +32,12 @@ class ChatPageState extends State<ChatPage> {
 
   String peerId;
   String peerAvatar;
-  String? id;
+  late String currentUserId;
 
   List<QueryDocumentSnapshot> listMessage = new List.from([]);
   int _limit = 20;
   int _limitIncrement = 20;
   String groupChatId = "";
-  SharedPreferences? prefs;
 
   File? imageFile;
   bool isLoading = false;
@@ -47,6 +48,20 @@ class ChatPageState extends State<ChatPage> {
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
 
+  late ChatProvider chatProvider;
+  late AuthProvider authProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    chatProvider = context.read<ChatProvider>();
+    authProvider = context.read<AuthProvider>();
+
+    focusNode.addListener(onFocusChange);
+    listScrollController.addListener(_scrollListener);
+    readLocal();
+  }
+
   _scrollListener() {
     if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange) {
@@ -54,14 +69,6 @@ class ChatPageState extends State<ChatPage> {
         _limit += _limitIncrement;
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode.addListener(onFocusChange);
-    listScrollController.addListener(_scrollListener);
-    readLocal();
   }
 
   void onFocusChange() {
@@ -73,21 +80,26 @@ class ChatPageState extends State<ChatPage> {
     }
   }
 
-  readLocal() async {
-    prefs = await SharedPreferences.getInstance();
-    id = prefs?.getString(FirestoreConstants.id) ?? '';
-    if (id.hashCode <= peerId.hashCode) {
-      groupChatId = '$id-$peerId';
+  void readLocal() {
+    if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
+      currentUserId = authProvider.getUserFirebaseId()!;
     } else {
-      groupChatId = '$peerId-$id';
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+        (Route<dynamic> route) => false,
+      );
+    }
+    if (currentUserId.hashCode <= peerId.hashCode) {
+      groupChatId = '$currentUserId-$peerId';
+    } else {
+      groupChatId = '$peerId-$currentUserId';
     }
 
-    FirebaseFirestore.instance
-        .collection(FirestoreConstants.pathUserCollection)
-        .doc(id)
-        .update({'chattingWith': peerId});
-
-    setState(() {});
+    chatProvider.updateDataFirestore(
+      FirestoreConstants.pathUserCollection,
+      currentUserId,
+      {FirestoreConstants.chattingWith: peerId},
+    );
   }
 
   Future getImage() async {
@@ -116,15 +128,13 @@ class ChatPageState extends State<ChatPage> {
 
   Future uploadFile() async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance.ref().child(fileName);
-    UploadTask uploadTask = reference.putFile(imageFile!);
-
+    UploadTask uploadTask = chatProvider.uploadFile(imageFile!, fileName);
     try {
       TaskSnapshot snapshot = await uploadTask;
       imageUrl = await snapshot.ref.getDownloadURL();
       setState(() {
         isLoading = false;
-        onSendMessage(imageUrl, 1);
+        onSendMessage(imageUrl, TypeMessage.image);
       });
     } on FirebaseException catch (e) {
       setState(() {
@@ -135,28 +145,9 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void onSendMessage(String content, int type) {
-    // type: 0 = text, 1 = image, 2 = sticker
-    if (content.trim() != '') {
+    if (content.trim().isNotEmpty) {
       textEditingController.clear();
-
-      var documentReference = FirebaseFirestore.instance
-          .collection('messages')
-          .doc(groupChatId)
-          .collection(groupChatId)
-          .doc(DateTime.now().millisecondsSinceEpoch.toString());
-
-      FirebaseFirestore.instance.runTransaction((transaction) async {
-        transaction.set(
-          documentReference,
-          {
-            'idFrom': id,
-            'idTo': peerId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-            'content': content,
-            'type': type
-          },
-        );
-      });
+      chatProvider.sendMessage(content, type, groupChatId, currentUserId, peerId);
       listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: Colors.black, textColor: Colors.red);
@@ -165,15 +156,16 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildItem(int index, DocumentSnapshot? document) {
     if (document != null) {
-      if (document.get('idFrom') == id) {
+      MessageChat messageChat = MessageChat.fromDocument(document);
+      if (messageChat.idFrom == currentUserId) {
         // Right (my message)
         return Row(
           children: <Widget>[
-            document.get('type') == 0
+            messageChat.type == TypeMessage.text
                 // Text
                 ? Container(
                     child: Text(
-                      document.get('content'),
+                      messageChat.content,
                       style: TextStyle(color: ColorConstants.primaryColor),
                     ),
                     padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -181,13 +173,13 @@ class ChatPageState extends State<ChatPage> {
                     decoration: BoxDecoration(color: ColorConstants.greyColor2, borderRadius: BorderRadius.circular(8)),
                     margin: EdgeInsets.only(bottom: isLastMessageRight(index) ? 20 : 10, right: 10),
                   )
-                : document.get('type') == 1
+                : messageChat.type == TypeMessage.image
                     // Image
                     ? Container(
                         child: OutlinedButton(
                           child: Material(
                             child: Image.network(
-                              document.get("content"),
+                              messageChat.content,
                               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return Container(
@@ -236,7 +228,7 @@ class ChatPageState extends State<ChatPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => FullPhotoPage(
-                                  url: document.get('content'),
+                                  url: messageChat.content,
                                 ),
                               ),
                             );
@@ -248,7 +240,7 @@ class ChatPageState extends State<ChatPage> {
                     // Sticker
                     : Container(
                         child: Image.asset(
-                          'images/${document.get('content')}.gif',
+                          'images/${messageChat.content}.gif',
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
@@ -298,10 +290,10 @@ class ChatPageState extends State<ChatPage> {
                           clipBehavior: Clip.hardEdge,
                         )
                       : Container(width: 35),
-                  document.get('type') == 0
+                  messageChat.type == TypeMessage.text
                       ? Container(
                           child: Text(
-                            document.get('content'),
+                            messageChat.content,
                             style: TextStyle(color: Colors.white),
                           ),
                           padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -310,12 +302,12 @@ class ChatPageState extends State<ChatPage> {
                               BoxDecoration(color: ColorConstants.primaryColor, borderRadius: BorderRadius.circular(8)),
                           margin: EdgeInsets.only(left: 10),
                         )
-                      : document.get('type') == 1
+                      : messageChat.type == TypeMessage.image
                           ? Container(
                               child: TextButton(
                                 child: Material(
                                   child: Image.network(
-                                    document.get('content'),
+                                    messageChat.content,
                                     loadingBuilder:
                                         (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                       if (loadingProgress == null) return child;
@@ -361,9 +353,11 @@ class ChatPageState extends State<ChatPage> {
                                 ),
                                 onPressed: () {
                                   Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FullPhotoPage(url: document.get('content'))));
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FullPhotoPage(url: messageChat.content),
+                                    ),
+                                  );
                                 },
                                 style: ButtonStyle(padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0))),
                               ),
@@ -371,7 +365,7 @@ class ChatPageState extends State<ChatPage> {
                             )
                           : Container(
                               child: Image.asset(
-                                'images/${document.get('content')}.gif',
+                                'images/${messageChat.content}.gif',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
@@ -386,7 +380,7 @@ class ChatPageState extends State<ChatPage> {
                   ? Container(
                       child: Text(
                         DateFormat('dd MMM kk:mm')
-                            .format(DateTime.fromMillisecondsSinceEpoch(int.parse(document.get('timestamp')))),
+                            .format(DateTime.fromMillisecondsSinceEpoch(int.parse(messageChat.timestamp))),
                         style: TextStyle(color: ColorConstants.greyColor, fontSize: 12, fontStyle: FontStyle.italic),
                       ),
                       margin: EdgeInsets.only(left: 50, top: 5, bottom: 5),
@@ -404,7 +398,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   bool isLastMessageLeft(int index) {
-    if ((index > 0 && listMessage[index - 1].get('idFrom') == id) || index == 0) {
+    if ((index > 0 && listMessage[index - 1].get(FirestoreConstants.idFrom) == currentUserId) || index == 0) {
       return true;
     } else {
       return false;
@@ -412,7 +406,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   bool isLastMessageRight(int index) {
-    if ((index > 0 && listMessage[index - 1].get('idFrom') != id) || index == 0) {
+    if ((index > 0 && listMessage[index - 1].get(FirestoreConstants.idFrom) != currentUserId) || index == 0) {
       return true;
     } else {
       return false;
@@ -425,10 +419,11 @@ class ChatPageState extends State<ChatPage> {
         isShowSticker = false;
       });
     } else {
-      FirebaseFirestore.instance
-          .collection(FirestoreConstants.pathUserCollection)
-          .doc(id)
-          .update({'chattingWith': null});
+      chatProvider.updateDataFirestore(
+        FirestoreConstants.pathUserCollection,
+        currentUserId,
+        {FirestoreConstants.chattingWith: null},
+      );
       Navigator.pop(context);
     }
 
@@ -478,7 +473,7 @@ class ChatPageState extends State<ChatPage> {
             Row(
               children: <Widget>[
                 TextButton(
-                  onPressed: () => onSendMessage('mimi1', 2),
+                  onPressed: () => onSendMessage('mimi1', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi1.gif',
                     width: 50,
@@ -487,7 +482,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi2', 2),
+                  onPressed: () => onSendMessage('mimi2', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi2.gif',
                     width: 50,
@@ -496,7 +491,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi3', 2),
+                  onPressed: () => onSendMessage('mimi3', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi3.gif',
                     width: 50,
@@ -510,7 +505,7 @@ class ChatPageState extends State<ChatPage> {
             Row(
               children: <Widget>[
                 TextButton(
-                  onPressed: () => onSendMessage('mimi4', 2),
+                  onPressed: () => onSendMessage('mimi4', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi4.gif',
                     width: 50,
@@ -519,7 +514,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi5', 2),
+                  onPressed: () => onSendMessage('mimi5', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi5.gif',
                     width: 50,
@@ -528,7 +523,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi6', 2),
+                  onPressed: () => onSendMessage('mimi6', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi6.gif',
                     width: 50,
@@ -542,7 +537,7 @@ class ChatPageState extends State<ChatPage> {
             Row(
               children: <Widget>[
                 TextButton(
-                  onPressed: () => onSendMessage('mimi7', 2),
+                  onPressed: () => onSendMessage('mimi7', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi7.gif',
                     width: 50,
@@ -551,7 +546,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi8', 2),
+                  onPressed: () => onSendMessage('mimi8', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi8.gif',
                     width: 50,
@@ -560,7 +555,7 @@ class ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => onSendMessage('mimi9', 2),
+                  onPressed: () => onSendMessage('mimi9', TypeMessage.sticker),
                   child: Image.asset(
                     'images/mimi9.gif',
                     width: 50,
@@ -621,7 +616,7 @@ class ChatPageState extends State<ChatPage> {
             child: Container(
               child: TextField(
                 onSubmitted: (value) {
-                  onSendMessage(textEditingController.text, 0);
+                  onSendMessage(textEditingController.text, TypeMessage.text);
                 },
                 style: TextStyle(color: ColorConstants.primaryColor, fontSize: 15),
                 controller: textEditingController,
@@ -640,7 +635,7 @@ class ChatPageState extends State<ChatPage> {
               margin: EdgeInsets.symmetric(horizontal: 8),
               child: IconButton(
                 icon: Icon(Icons.send),
-                onPressed: () => onSendMessage(textEditingController.text, 0),
+                onPressed: () => onSendMessage(textEditingController.text, TypeMessage.text),
                 color: ColorConstants.primaryColor,
               ),
             ),
@@ -659,13 +654,7 @@ class ChatPageState extends State<ChatPage> {
     return Flexible(
       child: groupChatId.isNotEmpty
           ? StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .doc(groupChatId)
-                  .collection(groupChatId)
-                  .orderBy('timestamp', descending: true)
-                  .limit(_limit)
-                  .snapshots(),
+              stream: chatProvider.getChatStream(groupChatId, _limit),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
                   listMessage.addAll(snapshot.data!.docs);

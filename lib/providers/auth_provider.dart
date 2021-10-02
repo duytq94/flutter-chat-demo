@@ -71,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
             FirestoreConstants.photoUrl: firebaseUser.photoURL,
             FirestoreConstants.id: firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-            'chattingWith': null
+            FirestoreConstants.chattingWith: null
           });
 
           // Write data to local storage
