@@ -46,6 +46,11 @@ class MyApp extends StatelessWidget {
             firebaseStorage: this.firebaseStorage,
           ),
         ),
+        Provider<HomeProvider>(
+          create: (_) => HomeProvider(
+            firebaseFirestore: this.firebaseFirestore,
+          ),
+        ),
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,

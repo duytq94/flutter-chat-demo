@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/widgets/loading_view.dart';
@@ -60,10 +61,10 @@ class SettingsPageStateState extends State<SettingsPageState> {
 
   void readLocal() {
     setState(() {
-      id = settingProvider.getPref("id") ?? "";
-      nickname = settingProvider.getPref("nickname") ?? "";
-      aboutMe = settingProvider.getPref("aboutMe") ?? "";
-      photoUrl = settingProvider.getPref("photoUrl") ?? "";
+      id = settingProvider.getPref(FirestoreConstants.id) ?? "";
+      nickname = settingProvider.getPref(FirestoreConstants.nickname) ?? "";
+      aboutMe = settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
+      photoUrl = settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
     });
 
     controllerNickname = TextEditingController(text: nickname);
@@ -100,8 +101,10 @@ class SettingsPageStateState extends State<SettingsPageState> {
         nickname: nickname,
         aboutMe: aboutMe,
       );
-      settingProvider.updateDataFirestore("users", id, updateInfo.toJson()).then((data) async {
-        await settingProvider.setPref('photoUrl', photoUrl);
+      settingProvider
+          .updateDataFirestore(FirestoreConstants.pathUserCollection, id, updateInfo.toJson())
+          .then((data) async {
+        await settingProvider.setPref(FirestoreConstants.photoUrl, photoUrl);
         setState(() {
           isLoading = false;
         });
@@ -133,10 +136,12 @@ class SettingsPageStateState extends State<SettingsPageState> {
       nickname: nickname,
       aboutMe: aboutMe,
     );
-    settingProvider.updateDataFirestore("users", id, updateInfo.toJson()).then((data) async {
-      await settingProvider.setPref('nickname', nickname);
-      await settingProvider.setPref('aboutMe', aboutMe);
-      await settingProvider.setPref('photoUrl', photoUrl);
+    settingProvider
+        .updateDataFirestore(FirestoreConstants.pathUserCollection, id, updateInfo.toJson())
+        .then((data) async {
+      await settingProvider.setPref(FirestoreConstants.nickname, nickname);
+      await settingProvider.setPref(FirestoreConstants.aboutMe, aboutMe);
+      await settingProvider.setPref(FirestoreConstants.photoUrl, photoUrl);
 
       setState(() {
         isLoading = false;
@@ -164,7 +169,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
               CupertinoButton(
                 onPressed: getImage,
                 child: Container(
-                  margin: EdgeInsets.all(20.0),
+                  margin: EdgeInsets.all(20),
                   child: avatarImageFile == null
                       ? photoUrl.isNotEmpty
                           ? ClipRRect(
@@ -227,7 +232,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                       style: TextStyle(
                           fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: ColorConstants.primaryColor),
                     ),
-                    margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
+                    margin: EdgeInsets.only(left: 10, bottom: 5, top: 10),
                   ),
                   Container(
                     child: Theme(
@@ -235,7 +240,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Sweetie',
-                          contentPadding: EdgeInsets.all(5.0),
+                          contentPadding: EdgeInsets.all(5),
                           hintStyle: TextStyle(color: ColorConstants.greyColor),
                         ),
                         controller: controllerNickname,
@@ -245,7 +250,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                         focusNode: focusNodeNickname,
                       ),
                     ),
-                    margin: EdgeInsets.only(left: 30.0, right: 30.0),
+                    margin: EdgeInsets.only(left: 30, right: 30),
                   ),
 
                   // About me
@@ -255,7 +260,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                       style: TextStyle(
                           fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: ColorConstants.primaryColor),
                     ),
-                    margin: EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
+                    margin: EdgeInsets.only(left: 10, top: 30, bottom: 5),
                   ),
                   Container(
                     child: Theme(
@@ -263,7 +268,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Fun, like travel and play PES...',
-                          contentPadding: EdgeInsets.all(5.0),
+                          contentPadding: EdgeInsets.all(5),
                           hintStyle: TextStyle(color: ColorConstants.greyColor),
                         ),
                         controller: controllerAboutMe,
@@ -273,7 +278,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                         focusNode: focusNodeAboutMe,
                       ),
                     ),
-                    margin: EdgeInsets.only(left: 30.0, right: 30.0),
+                    margin: EdgeInsets.only(left: 30, right: 30),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,20 +290,20 @@ class SettingsPageStateState extends State<SettingsPageState> {
                   onPressed: handleUpdateData,
                   child: Text(
                     'Update',
-                    style: TextStyle(fontSize: 16.0, color: Colors.white),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.primaryColor),
                     padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 10.0),
+                      EdgeInsets.fromLTRB(30, 10, 30, 10),
                     ),
                   ),
                 ),
-                margin: EdgeInsets.only(top: 50.0, bottom: 50.0),
+                margin: EdgeInsets.only(top: 50, bottom: 50),
               ),
             ],
           ),
-          padding: EdgeInsets.only(left: 15.0, right: 15.0),
+          padding: EdgeInsets.only(left: 15, right: 15),
         ),
 
         // Loading

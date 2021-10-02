@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,12 +32,12 @@ class AuthProvider extends ChangeNotifier {
   });
 
   String? getUserFirebaseId() {
-    return prefs.getString('id');
+    return prefs.getString(FirestoreConstants.id);
   }
 
   Future<bool> isLoggedIn() async {
     bool isLoggedIn = await googleSignIn.isSignedIn();
-    if (isLoggedIn && prefs.getString('id')?.isNotEmpty == true) {
+    if (isLoggedIn && prefs.getString(FirestoreConstants.id)?.isNotEmpty == true) {
       return true;
     } else {
       return false;
@@ -58,33 +59,35 @@ class AuthProvider extends ChangeNotifier {
       User? firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
-        final QuerySnapshot result =
-            await firebaseFirestore.collection('users').where('id', isEqualTo: firebaseUser.uid).get();
+        final QuerySnapshot result = await firebaseFirestore
+            .collection(FirestoreConstants.pathUserCollection)
+            .where(FirestoreConstants.id, isEqualTo: firebaseUser.uid)
+            .get();
         final List<DocumentSnapshot> documents = result.docs;
         if (documents.length == 0) {
           // Writing data to server because here is a new user
-          firebaseFirestore.collection('users').doc(firebaseUser.uid).set({
-            'nickname': firebaseUser.displayName,
-            'photoUrl': firebaseUser.photoURL,
-            'id': firebaseUser.uid,
+          firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUser.uid).set({
+            FirestoreConstants.nickname: firebaseUser.displayName,
+            FirestoreConstants.photoUrl: firebaseUser.photoURL,
+            FirestoreConstants.id: firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             'chattingWith': null
           });
 
           // Write data to local storage
           User? currentUser = firebaseUser;
-          await prefs.setString('id', currentUser.uid);
-          await prefs.setString('nickname', currentUser.displayName ?? "");
-          await prefs.setString('photoUrl', currentUser.photoURL ?? "");
+          await prefs.setString(FirestoreConstants.id, currentUser.uid);
+          await prefs.setString(FirestoreConstants.nickname, currentUser.displayName ?? "");
+          await prefs.setString(FirestoreConstants.photoUrl, currentUser.photoURL ?? "");
         } else {
           // Already sign up, just get data from firestore
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
-          await prefs.setString('id', userChat.id);
-          await prefs.setString('nickname', userChat.nickname);
-          await prefs.setString('photoUrl', userChat.photoUrl);
-          await prefs.setString('aboutMe', userChat.aboutMe);
+          await prefs.setString(FirestoreConstants.id, userChat.id);
+          await prefs.setString(FirestoreConstants.nickname, userChat.nickname);
+          await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
+          await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);
         }
         _status = Status.authenticated;
         notifyListeners();

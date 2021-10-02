@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,11 +41,13 @@ class HomePageState extends State<HomePage> {
   ];
   late AuthProvider authProvider;
   late String currentUserId;
+  late HomeProvider homeProvider;
 
   @override
   void initState() {
     super.initState();
     authProvider = context.read<AuthProvider>();
+    homeProvider = context.read<HomeProvider>();
     if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
       currentUserId = authProvider.getUserFirebaseId()!;
     } else {
@@ -70,8 +73,10 @@ class HomePageState extends State<HomePage> {
     });
 
     firebaseMessaging.getToken().then((token) {
-      print('token: $token');
-      FirebaseFirestore.instance.collection('users').doc(currentUserId).update({'pushToken': token});
+      print('push token: $token');
+      if (token != null) {
+        homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, currentUserId, {'pushToken': token});
+      }
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
@@ -143,25 +148,25 @@ class HomePageState extends State<HomePage> {
             children: <Widget>[
               Container(
                 color: ColorConstants.themeColor,
-                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-                height: 100.0,
+                padding: EdgeInsets.only(bottom: 10, top: 10),
+                height: 100,
                 child: Column(
                   children: <Widget>[
                     Container(
                       child: Icon(
                         Icons.exit_to_app,
-                        size: 30.0,
+                        size: 30,
                         color: Colors.white,
                       ),
-                      margin: EdgeInsets.only(bottom: 10.0),
+                      margin: EdgeInsets.only(bottom: 10),
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
@@ -177,10 +182,10 @@ class HomePageState extends State<HomePage> {
                         Icons.cancel,
                         color: ColorConstants.primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 10.0),
+                      margin: EdgeInsets.only(right: 10),
                     ),
                     Text(
-                      'CANCEL',
+                      'Cancel',
                       style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
@@ -197,10 +202,10 @@ class HomePageState extends State<HomePage> {
                         Icons.check_circle,
                         color: ColorConstants.primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 10.0),
+                      margin: EdgeInsets.only(right: 10),
                     ),
                     Text(
-                      'YES',
+                      'Yes',
                       style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
@@ -241,11 +246,11 @@ class HomePageState extends State<HomePage> {
             // List
             Container(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
+                stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
-                      padding: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(10),
                       itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
                       itemCount: snapshot.data?.docs.length,
                       controller: listScrollController,
@@ -286,7 +291,7 @@ class HomePageState extends State<HomePage> {
                     color: ColorConstants.primaryColor,
                   ),
                   Container(
-                    width: 10.0,
+                    width: 10,
                   ),
                   Text(
                     choice.title,
@@ -314,8 +319,8 @@ class HomePageState extends State<HomePage> {
                       ? Image.network(
                           userChat.photoUrl,
                           fit: BoxFit.cover,
-                          width: 50.0,
-                          height: 50.0,
+                          width: 50,
+                          height: 50,
                           loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
@@ -335,17 +340,17 @@ class HomePageState extends State<HomePage> {
                           errorBuilder: (context, object, stackTrace) {
                             return Icon(
                               Icons.account_circle,
-                              size: 50.0,
+                              size: 50,
                               color: ColorConstants.greyColor,
                             );
                           },
                         )
                       : Icon(
                           Icons.account_circle,
-                          size: 50.0,
+                          size: 50,
                           color: ColorConstants.greyColor,
                         ),
-                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
                   clipBehavior: Clip.hardEdge,
                 ),
                 Flexible(
@@ -359,7 +364,7 @@ class HomePageState extends State<HomePage> {
                             style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                          margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
                         ),
                         Container(
                           child: Text(
@@ -368,11 +373,11 @@ class HomePageState extends State<HomePage> {
                             style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         )
                       ],
                     ),
-                    margin: EdgeInsets.only(left: 20.0),
+                    margin: EdgeInsets.only(left: 20),
                   ),
                 ),
               ],
@@ -397,7 +402,7 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+          margin: EdgeInsets.only(bottom: 10, left: 5, right: 5),
         );
       }
     } else {

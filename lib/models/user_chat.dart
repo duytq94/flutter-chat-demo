@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_chat_demo/constants/constants.dart';
 
 class UserChat {
   String id;
@@ -10,9 +11,9 @@ class UserChat {
 
   Map<String, String> toJson() {
     return {
-      'nickname': nickname,
-      'aboutMe': aboutMe,
-      'photoUrl': photoUrl,
+      FirestoreConstants.nickname: nickname,
+      FirestoreConstants.aboutMe: aboutMe,
+      FirestoreConstants.photoUrl: photoUrl,
     };
   }
 
@@ -21,13 +22,13 @@ class UserChat {
     String photoUrl = "";
     String nickname = "";
     try {
-      aboutMe = doc.get('aboutMe');
+      aboutMe = doc.get(FirestoreConstants.aboutMe);
     } catch (e) {}
     try {
-      photoUrl = doc.get('photoUrl');
+      photoUrl = doc.get(FirestoreConstants.photoUrl);
     } catch (e) {}
     try {
-      nickname = doc.get('nickname');
+      nickname = doc.get(FirestoreConstants.nickname);
     } catch (e) {}
     return UserChat(
       id: doc.id,

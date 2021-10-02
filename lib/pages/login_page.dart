@@ -57,7 +57,7 @@ class LoginPageState extends State<LoginPage> {
                 },
                 child: Text(
                   'Sign in with Google',
-                  style: TextStyle(fontSize: 16.0, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -68,7 +68,7 @@ class LoginPageState extends State<LoginPage> {
                   ),
                   splashFactory: NoSplash.splashFactory,
                   padding: MaterialStateProperty.all<EdgeInsets>(
-                    EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0),
+                    EdgeInsets.fromLTRB(30, 15, 30, 15),
                   ),
                 ),
               ),
