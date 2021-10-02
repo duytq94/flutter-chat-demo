@@ -2,33 +2,31 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/constants/constants.dart';
+import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
-import '../main.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
 class HomePage extends StatefulWidget {
-  final String currentUserId;
-
-  HomePage({Key? key, required this.currentUserId}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
-  State createState() => HomePageState(currentUserId: currentUserId);
+  State createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  HomePageState({Key? key, required this.currentUserId});
+  HomePageState({Key? key});
 
-  final String currentUserId;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -41,10 +39,23 @@ class HomePageState extends State<HomePage> {
     const Choice(title: 'Settings', icon: Icons.settings),
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
   ];
+  late AuthProvider authProvider;
+  late String currentUserId;
+  late HomeProvider homeProvider;
 
   @override
   void initState() {
     super.initState();
+    authProvider = context.read<AuthProvider>();
+    homeProvider = context.read<HomeProvider>();
+    if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
+      currentUserId = authProvider.getUserFirebaseId()!;
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+        (Route<dynamic> route) => false,
+      );
+    }
     registerNotification();
     configLocalNotification();
     listScrollController.addListener(scrollListener);
@@ -62,8 +73,10 @@ class HomePageState extends State<HomePage> {
     });
 
     firebaseMessaging.getToken().then((token) {
-      print('token: $token');
-      FirebaseFirestore.instance.collection('users').doc(currentUserId).update({'pushToken': token});
+      print('push token: $token');
+      if (token != null) {
+        homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, currentUserId, {'pushToken': token});
+      }
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
@@ -124,35 +137,36 @@ class HomePageState extends State<HomePage> {
     return Future.value(false);
   }
 
-  Future<Null> openDialog() async {
+  Future<void> openDialog() async {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: EdgeInsets.zero,
             children: <Widget>[
               Container(
                 color: ColorConstants.themeColor,
-                margin: EdgeInsets.all(0.0),
-                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-                height: 100.0,
+                padding: EdgeInsets.only(bottom: 10, top: 10),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Container(
                       child: Icon(
                         Icons.exit_to_app,
-                        size: 30.0,
+                        size: 30,
                         color: Colors.white,
                       ),
-                      margin: EdgeInsets.only(bottom: 10.0),
+                      margin: EdgeInsets.only(bottom: 10),
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
@@ -168,10 +182,10 @@ class HomePageState extends State<HomePage> {
                         Icons.cancel,
                         color: ColorConstants.primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 10.0),
+                      margin: EdgeInsets.only(right: 10),
                     ),
                     Text(
-                      'CANCEL',
+                      'Cancel',
                       style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
@@ -188,10 +202,10 @@ class HomePageState extends State<HomePage> {
                         Icons.check_circle,
                         color: ColorConstants.primaryColor,
                       ),
-                      margin: EdgeInsets.only(right: 10.0),
+                      margin: EdgeInsets.only(right: 10),
                     ),
                     Text(
-                      'YES',
+                      'Yes',
                       style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
@@ -207,21 +221,12 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  Future<Null> handleSignOut() async {
-    this.setState(() {
-      isLoading = true;
-    });
-
-    await FirebaseAuth.instance.signOut();
-    await googleSignIn.disconnect();
-    await googleSignIn.signOut();
-
-    this.setState(() {
-      isLoading = false;
-    });
-
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
+  Future<void> handleSignOut() async {
+    authProvider.handleSignOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -233,32 +238,7 @@ class HomePageState extends State<HomePage> {
           style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        actions: <Widget>[
-          PopupMenuButton<Choice>(
-            onSelected: onItemMenuPress,
-            itemBuilder: (BuildContext context) {
-              return choices.map((Choice choice) {
-                return PopupMenuItem<Choice>(
-                    value: choice,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          choice.icon,
-                          color: ColorConstants.primaryColor,
-                        ),
-                        Container(
-                          width: 10.0,
-                        ),
-                        Text(
-                          choice.title,
-                          style: TextStyle(color: ColorConstants.primaryColor),
-                        ),
-                      ],
-                    ));
-              }).toList();
-            },
-          ),
-        ],
+        actions: <Widget>[buildPopupMenu()],
       ),
       body: WillPopScope(
         child: Stack(
@@ -266,11 +246,11 @@ class HomePageState extends State<HomePage> {
             // List
             Container(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('users').limit(_limit).snapshots(),
+                stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
-                      padding: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(10),
                       itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
                       itemCount: snapshot.data?.docs.length,
                       controller: listScrollController,
@@ -278,7 +258,7 @@ class HomePageState extends State<HomePage> {
                   } else {
                     return Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(ColorConstants.primaryColor),
+                        color: ColorConstants.themeColor,
                       ),
                     );
                   }
@@ -288,12 +268,39 @@ class HomePageState extends State<HomePage> {
 
             // Loading
             Positioned(
-              child: isLoading ? const Loading() : Container(),
+              child: isLoading ? LoadingView() : SizedBox.shrink(),
             )
           ],
         ),
         onWillPop: onBackPress,
       ),
+    );
+  }
+
+  Widget buildPopupMenu() {
+    return PopupMenuButton<Choice>(
+      onSelected: onItemMenuPress,
+      itemBuilder: (BuildContext context) {
+        return choices.map((Choice choice) {
+          return PopupMenuItem<Choice>(
+              value: choice,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    choice.icon,
+                    color: ColorConstants.primaryColor,
+                  ),
+                  Container(
+                    width: 10,
+                  ),
+                  Text(
+                    choice.title,
+                    style: TextStyle(color: ColorConstants.primaryColor),
+                  ),
+                ],
+              ));
+        }).toList();
+      },
     );
   }
 
@@ -312,8 +319,8 @@ class HomePageState extends State<HomePage> {
                       ? Image.network(
                           userChat.photoUrl,
                           fit: BoxFit.cover,
-                          width: 50.0,
-                          height: 50.0,
+                          width: 50,
+                          height: 50,
                           loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
@@ -321,7 +328,7 @@ class HomePageState extends State<HomePage> {
                               height: 50,
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  color: ColorConstants.primaryColor,
+                                  color: ColorConstants.themeColor,
                                   value: loadingProgress.expectedTotalBytes != null &&
                                           loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -333,17 +340,17 @@ class HomePageState extends State<HomePage> {
                           errorBuilder: (context, object, stackTrace) {
                             return Icon(
                               Icons.account_circle,
-                              size: 50.0,
+                              size: 50,
                               color: ColorConstants.greyColor,
                             );
                           },
                         )
                       : Icon(
                           Icons.account_circle,
-                          size: 50.0,
+                          size: 50,
                           color: ColorConstants.greyColor,
                         ),
-                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
                   clipBehavior: Clip.hardEdge,
                 ),
                 Flexible(
@@ -357,7 +364,7 @@ class HomePageState extends State<HomePage> {
                             style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                          margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
                         ),
                         Container(
                           child: Text(
@@ -366,11 +373,11 @@ class HomePageState extends State<HomePage> {
                             style: TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         )
                       ],
                     ),
-                    margin: EdgeInsets.only(left: 20.0),
+                    margin: EdgeInsets.only(left: 20),
                   ),
                 ),
               ],
@@ -395,7 +402,7 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+          margin: EdgeInsets.only(bottom: 10, left: 5, right: 5),
         );
       }
     } else {
