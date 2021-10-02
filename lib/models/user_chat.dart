@@ -8,6 +8,14 @@ class UserChat {
 
   UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe});
 
+  Map<String, String> toJson() {
+    return {
+      'nickname': nickname,
+      'aboutMe': aboutMe,
+      'photoUrl': photoUrl,
+    };
+  }
+
   factory UserChat.fromDocument(DocumentSnapshot doc) {
     String aboutMe = "";
     String photoUrl = "";

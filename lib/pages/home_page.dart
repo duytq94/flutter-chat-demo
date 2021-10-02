@@ -132,16 +132,17 @@ class HomePageState extends State<HomePage> {
     return Future.value(false);
   }
 
-  Future<Null> openDialog() async {
+  Future<void> openDialog() async {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: EdgeInsets.zero,
             children: <Widget>[
               Container(
                 color: ColorConstants.themeColor,
-                margin: EdgeInsets.all(0.0),
                 padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
                 height: 100.0,
                 child: Column(

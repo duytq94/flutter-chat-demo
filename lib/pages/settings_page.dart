@@ -3,12 +3,16 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/models/models.dart';
+import 'package:flutter_chat_demo/providers/providers.dart';
+import 'package:flutter_chat_demo/widgets/loading_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -35,8 +39,6 @@ class SettingsPageStateState extends State<SettingsPageState> {
   TextEditingController? controllerNickname;
   TextEditingController? controllerAboutMe;
 
-  SharedPreferences? prefs;
-
   String id = '';
   String nickname = '';
   String aboutMe = '';
@@ -44,6 +46,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
 
   bool isLoading = false;
   File? avatarImageFile;
+  late SettingProvider settingProvider;
 
   final FocusNode focusNodeNickname = FocusNode();
   final FocusNode focusNodeAboutMe = FocusNode();
@@ -51,21 +54,20 @@ class SettingsPageStateState extends State<SettingsPageState> {
   @override
   void initState() {
     super.initState();
+    settingProvider = context.read<SettingProvider>();
     readLocal();
   }
 
-  void readLocal() async {
-    prefs = await SharedPreferences.getInstance();
-    id = prefs?.getString('id') ?? '';
-    nickname = prefs?.getString('nickname') ?? '';
-    aboutMe = prefs?.getString('aboutMe') ?? '';
-    photoUrl = prefs?.getString('photoUrl') ?? '';
+  void readLocal() {
+    setState(() {
+      id = settingProvider.getPref("id") ?? "";
+      nickname = settingProvider.getPref("nickname") ?? "";
+      aboutMe = settingProvider.getPref("aboutMe") ?? "";
+      photoUrl = settingProvider.getPref("photoUrl") ?? "";
+    });
 
     controllerNickname = TextEditingController(text: nickname);
     controllerAboutMe = TextEditingController(text: aboutMe);
-
-    // Force refresh input
-    setState(() {});
   }
 
   Future getImage() async {
@@ -88,16 +90,18 @@ class SettingsPageStateState extends State<SettingsPageState> {
 
   Future uploadFile() async {
     String fileName = id;
-    Reference reference = FirebaseStorage.instance.ref().child(fileName);
-    UploadTask uploadTask = reference.putFile(avatarImageFile!);
+    UploadTask uploadTask = settingProvider.uploadFile(avatarImageFile!, fileName);
     try {
       TaskSnapshot snapshot = await uploadTask;
       photoUrl = await snapshot.ref.getDownloadURL();
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(id)
-          .update({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
-        await prefs?.setString('photoUrl', photoUrl);
+      UserChat updateInfo = UserChat(
+        id: id,
+        photoUrl: photoUrl,
+        nickname: nickname,
+        aboutMe: aboutMe,
+      );
+      settingProvider.updateDataFirestore("users", id, updateInfo.toJson()).then((data) async {
+        await settingProvider.setPref('photoUrl', photoUrl);
         setState(() {
           isLoading = false;
         });
@@ -123,14 +127,16 @@ class SettingsPageStateState extends State<SettingsPageState> {
     setState(() {
       isLoading = true;
     });
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(id)
-        .update({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
-      await prefs?.setString('nickname', nickname);
-      await prefs?.setString('aboutMe', aboutMe);
-      await prefs?.setString('photoUrl', photoUrl);
+    UserChat updateInfo = UserChat(
+      id: id,
+      photoUrl: photoUrl,
+      nickname: nickname,
+      aboutMe: aboutMe,
+    );
+    settingProvider.updateDataFirestore("users", id, updateInfo.toJson()).then((data) async {
+      await settingProvider.setPref('nickname', nickname);
+      await settingProvider.setPref('aboutMe', aboutMe);
+      await settingProvider.setPref('photoUrl', photoUrl);
 
       setState(() {
         isLoading = false;
@@ -152,80 +158,63 @@ class SettingsPageStateState extends State<SettingsPageState> {
       children: <Widget>[
         SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               // Avatar
-              Container(
-                child: Center(
-                  child: Stack(
-                    children: <Widget>[
-                      avatarImageFile == null
-                          ? photoUrl.isNotEmpty
-                              ? Material(
-                                  child: Image.network(
-                                    photoUrl,
-                                    fit: BoxFit.cover,
-                                    width: 90.0,
-                                    height: 90.0,
-                                    errorBuilder: (context, object, stackTrace) {
-                                      return Icon(
-                                        Icons.account_circle,
-                                        size: 90.0,
-                                        color: ColorConstants.greyColor,
-                                      );
-                                    },
-                                    loadingBuilder:
-                                        (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        width: 90.0,
-                                        height: 90.0,
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            color: ColorConstants.themeColor,
-                                            value: loadingProgress.expectedTotalBytes != null &&
-                                                    loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  borderRadius: BorderRadius.all(Radius.circular(45.0)),
-                                  clipBehavior: Clip.hardEdge,
-                                )
-                              : Icon(
-                                  Icons.account_circle,
-                                  size: 90.0,
-                                  color: ColorConstants.greyColor,
-                                )
-                          : Material(
-                              child: Image.file(
-                                avatarImageFile!,
-                                width: 90.0,
-                                height: 90.0,
+              CupertinoButton(
+                onPressed: getImage,
+                child: Container(
+                  margin: EdgeInsets.all(20.0),
+                  child: avatarImageFile == null
+                      ? photoUrl.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(45),
+                              child: Image.network(
+                                photoUrl,
                                 fit: BoxFit.cover,
+                                width: 90,
+                                height: 90,
+                                errorBuilder: (context, object, stackTrace) {
+                                  return Icon(
+                                    Icons.account_circle,
+                                    size: 90,
+                                    color: ColorConstants.greyColor,
+                                  );
+                                },
+                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    width: 90,
+                                    height: 90,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorConstants.themeColor,
+                                        value: loadingProgress.expectedTotalBytes != null &&
+                                                loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                              borderRadius: BorderRadius.all(Radius.circular(45.0)),
-                              clipBehavior: Clip.hardEdge,
-                            ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.camera_alt,
-                          color: ColorConstants.primaryColor.withOpacity(0.5),
+                            )
+                          : Icon(
+                              Icons.account_circle,
+                              size: 90,
+                              color: ColorConstants.greyColor,
+                            )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(45),
+                          child: Image.file(
+                            avatarImageFile!,
+                            width: 90,
+                            height: 90,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        onPressed: getImage,
-                        padding: EdgeInsets.all(30.0),
-                        splashColor: Colors.transparent,
-                        highlightColor: ColorConstants.greyColor,
-                        iconSize: 30.0,
-                      ),
-                    ],
-                  ),
                 ),
-                width: double.infinity,
-                margin: EdgeInsets.all(20.0),
               ),
 
               // Input
@@ -295,7 +284,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
                 child: TextButton(
                   onPressed: handleUpdateData,
                   child: Text(
-                    'UPDATE',
+                    'Update',
                     style: TextStyle(fontSize: 16.0, color: Colors.white),
                   ),
                   style: ButtonStyle(
@@ -313,18 +302,7 @@ class SettingsPageStateState extends State<SettingsPageState> {
         ),
 
         // Loading
-        Positioned(
-          child: isLoading
-              ? Container(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: ColorConstants.themeColor,
-                    ),
-                  ),
-                  color: Colors.white.withOpacity(0.8),
-                )
-              : SizedBox.shrink(),
-        ),
+        Positioned(child: isLoading ? LoadingView() : SizedBox.shrink()),
       ],
     );
   }
