@@ -20,5 +20,5 @@
 * Run `flutter run` (remember open simulator or connect physical device, iOS auto run additional command `pod install`)
 
 ## Big update
-* Jun, 4th, 2021 — Migrating to Flutter 2 and using Dart sound null safety
+* Jun, 4th, 2021 - Migrating to Flutter 2 and using Dart sound null safety
 * Oct, 2th, 2021 - Apply provider & restructure

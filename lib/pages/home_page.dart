@@ -8,6 +8,7 @@ import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
+import 'package:flutter_chat_demo/utils/utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -34,20 +35,27 @@ class HomePageState extends State<HomePage> {
 
   int _limit = 20;
   int _limitIncrement = 20;
+  String _textSearch = "";
   bool isLoading = false;
-  List<Choice> choices = const <Choice>[
-    const Choice(title: 'Settings', icon: Icons.settings),
-    const Choice(title: 'Log out', icon: Icons.exit_to_app),
-  ];
+
   late AuthProvider authProvider;
   late String currentUserId;
   late HomeProvider homeProvider;
+  Debouncer searchDebouncer = Debouncer(milliseconds: 300);
+  StreamController<bool> btnClearController = StreamController<bool>();
+  TextEditingController searchBarTec = TextEditingController();
+
+  List<PopupChoices> choices = <PopupChoices>[
+    PopupChoices(title: 'Settings', icon: Icons.settings),
+    PopupChoices(title: 'Log out', icon: Icons.exit_to_app),
+  ];
 
   @override
   void initState() {
     super.initState();
     authProvider = context.read<AuthProvider>();
     homeProvider = context.read<HomeProvider>();
+
     if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
       currentUserId = authProvider.getUserFirebaseId()!;
     } else {
@@ -59,6 +67,12 @@ class HomePageState extends State<HomePage> {
     registerNotification();
     configLocalNotification();
     listScrollController.addListener(scrollListener);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    btnClearController.close();
   }
 
   void registerNotification() {
@@ -99,7 +113,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  void onItemMenuPress(Choice choice) {
+  void onItemMenuPress(PopupChoices choice) {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
@@ -235,7 +249,7 @@ class HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(
           AppConstants.homeTitle,
-          style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
         actions: <Widget>[buildPopupMenu()],
@@ -244,26 +258,37 @@ class HomePageState extends State<HomePage> {
         child: Stack(
           children: <Widget>[
             // List
-            Container(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10),
-                      itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
-                      itemCount: snapshot.data?.docs.length,
-                      controller: listScrollController,
-                    );
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: ColorConstants.themeColor,
-                      ),
-                    );
-                  }
-                },
-              ),
+            Column(
+              children: [
+                buildSearchBar(),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
+                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasData) {
+                        if ((snapshot.data?.docs.length ?? 0) > 0) {
+                          return ListView.builder(
+                            padding: EdgeInsets.all(10),
+                            itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
+                            itemCount: snapshot.data?.docs.length,
+                            controller: listScrollController,
+                          );
+                        } else {
+                          return Center(
+                            child: Text("No users"),
+                          );
+                        }
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: ColorConstants.themeColor,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
 
             // Loading
@@ -277,12 +302,72 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  Widget buildSearchBar() {
+    return Container(
+      height: 40,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.search, color: ColorConstants.greyColor, size: 20),
+          SizedBox(width: 5),
+          Expanded(
+            child: TextFormField(
+              textInputAction: TextInputAction.search,
+              controller: searchBarTec,
+              onChanged: (value) {
+                searchDebouncer.run(() {
+                  if (value.isNotEmpty) {
+                    btnClearController.add(true);
+                    setState(() {
+                      _textSearch = value;
+                    });
+                  } else {
+                    btnClearController.add(false);
+                    setState(() {
+                      _textSearch = "";
+                    });
+                  }
+                });
+              },
+              decoration: InputDecoration.collapsed(
+                hintText: 'Search nickname (you have to type exactly string)',
+                hintStyle: TextStyle(fontSize: 13, color: ColorConstants.greyColor),
+              ),
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
+          StreamBuilder<bool>(
+              stream: btnClearController.stream,
+              builder: (context, snapshot) {
+                return snapshot.data == true
+                    ? GestureDetector(
+                        onTap: () {
+                          searchBarTec.clear();
+                          btnClearController.add(false);
+                          setState(() {
+                            _textSearch = "";
+                          });
+                        },
+                        child: Icon(Icons.clear_rounded, color: ColorConstants.greyColor, size: 20))
+                    : SizedBox.shrink();
+              }),
+        ],
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: ColorConstants.greyColor2,
+      ),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+      margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
+    );
+  }
+
   Widget buildPopupMenu() {
-    return PopupMenuButton<Choice>(
+    return PopupMenuButton<PopupChoices>(
       onSelected: onItemMenuPress,
       itemBuilder: (BuildContext context) {
-        return choices.map((Choice choice) {
-          return PopupMenuItem<Choice>(
+        return choices.map((PopupChoices choice) {
+          return PopupMenuItem<PopupChoices>(
               value: choice,
               child: Row(
                 children: <Widget>[
@@ -383,12 +468,16 @@ class HomePageState extends State<HomePage> {
               ],
             ),
             onPressed: () {
+              if (Utilities.isKeyboardShowing()) {
+                Utilities.closeKeyboard(context);
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ChatPage(
                     peerId: userChat.id,
                     peerAvatar: userChat.photoUrl,
+                    peerNickname: userChat.nickname,
                   ),
                 ),
               );
@@ -409,11 +498,4 @@ class HomePageState extends State<HomePage> {
       return SizedBox.shrink();
     }
   }
-}
-
-class Choice {
-  const Choice({required this.title, required this.icon});
-
-  final String title;
-  final IconData icon;
 }

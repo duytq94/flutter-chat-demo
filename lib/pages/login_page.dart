@@ -36,7 +36,7 @@ class LoginPageState extends State<LoginPage> {
         appBar: AppBar(
           title: Text(
             AppConstants.loginTitle,
-            style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
+            style: TextStyle(color: ColorConstants.primaryColor),
           ),
           centerTitle: true,
         ),

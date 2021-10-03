@@ -14,7 +14,7 @@ class FullPhotoPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           AppConstants.fullPhotoTitle,
-          style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
       ),

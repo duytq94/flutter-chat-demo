@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
@@ -20,18 +19,24 @@ import 'pages.dart';
 class ChatPage extends StatefulWidget {
   final String peerId;
   final String peerAvatar;
+  final String peerNickname;
 
-  ChatPage({Key? key, required this.peerId, required this.peerAvatar}) : super(key: key);
+  ChatPage({Key? key, required this.peerId, required this.peerAvatar, required this.peerNickname}) : super(key: key);
 
   @override
-  State createState() => ChatPageState(peerId: peerId, peerAvatar: peerAvatar);
+  State createState() => ChatPageState(
+        peerId: this.peerId,
+        peerAvatar: this.peerAvatar,
+        peerNickname: this.peerNickname,
+      );
 }
 
 class ChatPageState extends State<ChatPage> {
-  ChatPageState({Key? key, required this.peerId, required this.peerAvatar});
+  ChatPageState({Key? key, required this.peerId, required this.peerAvatar, required this.peerNickname});
 
   String peerId;
   String peerAvatar;
+  String peerNickname;
   late String currentUserId;
 
   List<QueryDocumentSnapshot> listMessage = new List.from([]);
@@ -150,7 +155,7 @@ class ChatPageState extends State<ChatPage> {
       chatProvider.sendMessage(content, type, groupChatId, currentUserId, peerId);
       listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
-      Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: Colors.black, textColor: Colors.red);
+      Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
     }
   }
 
@@ -435,8 +440,8 @@ class ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppConstants.chatTitle,
-          style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
+          this.peerNickname,
+          style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
       ),
