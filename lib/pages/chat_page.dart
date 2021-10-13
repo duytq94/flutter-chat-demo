@@ -39,7 +39,7 @@ class ChatPageState extends State<ChatPage> {
   String peerNickname;
   late String currentUserId;
 
-  List<QueryDocumentSnapshot> listMessage = new List.from([]);
+  List<QueryDocumentSnapshot> listMessage = [];
   int _limit = 20;
   int _limitIncrement = 20;
   String groupChatId = "";
@@ -662,7 +662,7 @@ class ChatPageState extends State<ChatPage> {
               stream: chatProvider.getChatStream(groupChatId, _limit),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
-                  listMessage.addAll(snapshot.data!.docs);
+                  listMessage = snapshot.data!.docs;
                   return ListView.builder(
                     padding: EdgeInsets.all(10),
                     itemBuilder: (context, index) => buildItem(index, snapshot.data?.docs[index]),
