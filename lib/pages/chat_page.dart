@@ -69,7 +69,8 @@ class ChatPageState extends State<ChatPage> {
 
   _scrollListener() {
     if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
-        !listScrollController.position.outOfRange) {
+        !listScrollController.position.outOfRange &&
+        _limit <= listMessage.length) {
       setState(() {
         _limit += _limitIncrement;
       });
