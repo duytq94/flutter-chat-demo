@@ -664,13 +664,17 @@ class ChatPageState extends State<ChatPage> {
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
                   listMessage = snapshot.data!.docs;
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10),
-                    itemBuilder: (context, index) => buildItem(index, snapshot.data?.docs[index]),
-                    itemCount: snapshot.data?.docs.length,
-                    reverse: true,
-                    controller: listScrollController,
-                  );
+                  if (listMessage.length > 0) {
+                    return ListView.builder(
+                      padding: EdgeInsets.all(10),
+                      itemBuilder: (context, index) => buildItem(index, snapshot.data?.docs[index]),
+                      itemCount: snapshot.data?.docs.length,
+                      reverse: true,
+                      controller: listScrollController,
+                    );
+                  } else {
+                    return Center(child: Text("No message here yet..."));
+                  }
                 } else {
                   return Center(
                     child: CircularProgressIndicator(
