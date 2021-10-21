@@ -95,7 +95,7 @@ class ChatPageState extends State<ChatPage> {
         (Route<dynamic> route) => false,
       );
     }
-    if (currentUserId.hashCode <= peerId.hashCode) {
+    if (currentUserId.compareTo(peerId) > 0) {
       groupChatId = '$currentUserId-$peerId';
     } else {
       groupChatId = '$peerId-$currentUserId';
