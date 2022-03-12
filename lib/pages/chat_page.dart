@@ -200,8 +200,7 @@ class ChatPageState extends State<ChatPage> {
                                   child: Center(
                                     child: CircularProgressIndicator(
                                       color: ColorConstants.themeColor,
-                                      value: loadingProgress.expectedTotalBytes != null &&
-                                              loadingProgress.expectedTotalBytes != null
+                                      value: loadingProgress.expectedTotalBytes != null
                                           ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                                           : null,
                                     ),
@@ -272,8 +271,7 @@ class ChatPageState extends State<ChatPage> {
                               return Center(
                                 child: CircularProgressIndicator(
                                   color: ColorConstants.themeColor,
-                                  value: loadingProgress.expectedTotalBytes != null &&
-                                          loadingProgress.expectedTotalBytes != null
+                                  value: loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
@@ -329,8 +327,7 @@ class ChatPageState extends State<ChatPage> {
                                         child: Center(
                                           child: CircularProgressIndicator(
                                             color: ColorConstants.themeColor,
-                                            value: loadingProgress.expectedTotalBytes != null &&
-                                                    loadingProgress.expectedTotalBytes != null
+                                            value: loadingProgress.expectedTotalBytes != null
                                                 ? loadingProgress.cumulativeBytesLoaded /
                                                     loadingProgress.expectedTotalBytes!
                                                 : null,
