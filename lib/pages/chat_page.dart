@@ -17,26 +17,15 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 
 class ChatPage extends StatefulWidget {
-  final String peerId;
-  final String peerAvatar;
-  final String peerNickname;
+  ChatPage({Key? key, required this.arguments}) : super(key: key);
 
-  ChatPage({Key? key, required this.peerId, required this.peerAvatar, required this.peerNickname}) : super(key: key);
+  final ChatPageArguments arguments;
 
   @override
-  State createState() => ChatPageState(
-        peerId: this.peerId,
-        peerAvatar: this.peerAvatar,
-        peerNickname: this.peerNickname,
-      );
+  ChatPageState createState() => ChatPageState();
 }
 
 class ChatPageState extends State<ChatPage> {
-  ChatPageState({Key? key, required this.peerId, required this.peerAvatar, required this.peerNickname});
-
-  String peerId;
-  String peerAvatar;
-  String peerNickname;
   late String currentUserId;
 
   List<QueryDocumentSnapshot> listMessage = [];
@@ -95,6 +84,7 @@ class ChatPageState extends State<ChatPage> {
         (Route<dynamic> route) => false,
       );
     }
+    String peerId = widget.arguments.peerId;
     if (currentUserId.compareTo(peerId) > 0) {
       groupChatId = '$currentUserId-$peerId';
     } else {
@@ -153,7 +143,7 @@ class ChatPageState extends State<ChatPage> {
   void onSendMessage(String content, int type) {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
-      chatProvider.sendMessage(content, type, groupChatId, currentUserId, peerId);
+      chatProvider.sendMessage(content, type, groupChatId, currentUserId, widget.arguments.peerId);
       listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
@@ -265,7 +255,7 @@ class ChatPageState extends State<ChatPage> {
                   isLastMessageLeft(index)
                       ? Material(
                           child: Image.network(
-                            peerAvatar,
+                            widget.arguments.peerAvatar,
                             loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Center(
@@ -438,7 +428,7 @@ class ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          this.peerNickname,
+          this.widget.arguments.peerNickname,
           style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
@@ -688,4 +678,12 @@ class ChatPageState extends State<ChatPage> {
             ),
     );
   }
+}
+
+class ChatPageArguments {
+  final String peerId;
+  final String peerAvatar;
+  final String peerNickname;
+
+  ChatPageArguments({required this.peerId, required this.peerAvatar, required this.peerNickname});
 }
