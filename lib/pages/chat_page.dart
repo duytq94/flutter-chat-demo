@@ -391,19 +391,11 @@ class ChatPageState extends State<ChatPage> {
   }
 
   bool isLastMessageLeft(int index) {
-    if ((index > 0 && listMessage[index - 1].get(FirestoreConstants.idFrom) == currentUserId) || index == 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return index == 0 || listMessage[index - 1].get(FirestoreConstants.idFrom) == currentUserId;
   }
 
   bool isLastMessageRight(int index) {
-    if ((index > 0 && listMessage[index - 1].get(FirestoreConstants.idFrom) != currentUserId) || index == 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return index == 0 || listMessage[index - 1].get(FirestoreConstants.idFrom) != currentUserId;
   }
 
   Future<bool> onBackPress() {
