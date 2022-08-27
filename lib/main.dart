@@ -63,6 +63,7 @@ class MyApp extends StatelessWidget {
         title: AppConstants.appTitle,
         theme: ThemeData(
           primaryColor: ColorConstants.themeColor,
+          primarySwatch: MaterialColor(0xfff5a623, ColorConstants.swatchColor),
         ),
         home: SplashPage(),
         debugShowCheckedModeBanner: false,

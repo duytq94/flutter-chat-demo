@@ -57,6 +57,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   _scrollListener() {
+    if (!listScrollController.hasClients) return;
     if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
         !listScrollController.position.outOfRange &&
         _limit <= listMessage.length) {
@@ -144,7 +145,9 @@ class ChatPageState extends State<ChatPage> {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
       chatProvider.sendMessage(content, type, groupChatId, currentUserId, widget.arguments.peerId);
-      listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      if (listScrollController.hasClients) {
+        listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      }
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
     }
@@ -433,27 +436,29 @@ class ChatPageState extends State<ChatPage> {
         ),
         centerTitle: true,
       ),
-      body: WillPopScope(
-        child: Stack(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                // List of messages
-                buildListMessage(),
+      body: SafeArea(
+        child: WillPopScope(
+          child: Stack(
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  // List of messages
+                  buildListMessage(),
 
-                // Sticker
-                isShowSticker ? buildSticker() : SizedBox.shrink(),
+                  // Sticker
+                  isShowSticker ? buildSticker() : SizedBox.shrink(),
 
-                // Input content
-                buildInput(),
-              ],
-            ),
+                  // Input content
+                  buildInput(),
+                ],
+              ),
 
-            // Loading
-            buildLoading()
-          ],
+              // Loading
+              buildLoading()
+            ],
+          ),
+          onWillPop: onBackPress,
         ),
-        onWillPop: onBackPress,
       ),
     );
   }
@@ -618,6 +623,7 @@ class ChatPageState extends State<ChatPage> {
                   hintStyle: TextStyle(color: ColorConstants.greyColor),
                 ),
                 focusNode: focusNode,
+                autofocus: true,
               ),
             ),
           ),

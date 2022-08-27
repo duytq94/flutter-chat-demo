@@ -45,15 +45,19 @@ class LoginPageState extends State<LoginPage> {
             Center(
               child: TextButton(
                 onPressed: () async {
-                  bool isSuccess = await authProvider.handleSignIn();
-                  if (isSuccess) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(),
-                      ),
-                    );
-                  }
+                  authProvider.handleSignIn().then((isSuccess) {
+                    if (isSuccess) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(),
+                        ),
+                      );
+                    }
+                  }).catchError((error, stackTrace) {
+                    Fluttertoast.showToast(msg: error.toString());
+                    authProvider.handleException();
+                  });
                 },
                 child: Text(
                   'Sign in with Google',

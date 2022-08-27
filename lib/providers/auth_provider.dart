@@ -11,6 +11,7 @@ enum Status {
   authenticated,
   authenticating,
   authenticateError,
+  authenticateException,
   authenticateCanceled,
 }
 
@@ -102,6 +103,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  void handleException() {
+    _status = Status.authenticateException;
+    notifyListeners();
   }
 
   Future<void> handleSignOut() async {

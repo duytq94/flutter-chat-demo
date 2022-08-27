@@ -125,7 +125,6 @@ class HomePageState extends State<HomePage> {
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
-      'your channel description',
       playSound: true,
       enableVibration: true,
       importance: Importance.max,
@@ -254,50 +253,52 @@ class HomePageState extends State<HomePage> {
         centerTitle: true,
         actions: <Widget>[buildPopupMenu()],
       ),
-      body: WillPopScope(
-        child: Stack(
-          children: <Widget>[
-            // List
-            Column(
-              children: [
-                buildSearchBar(),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
-                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasData) {
-                        if ((snapshot.data?.docs.length ?? 0) > 0) {
-                          return ListView.builder(
-                            padding: EdgeInsets.all(10),
-                            itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
-                            itemCount: snapshot.data?.docs.length,
-                            controller: listScrollController,
-                          );
+      body: SafeArea(
+        child: WillPopScope(
+          child: Stack(
+            children: <Widget>[
+              // List
+              Column(
+                children: [
+                  buildSearchBar(),
+                  Expanded(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
+                      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasData) {
+                          if ((snapshot.data?.docs.length ?? 0) > 0) {
+                            return ListView.builder(
+                              padding: EdgeInsets.all(10),
+                              itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
+                              itemCount: snapshot.data?.docs.length,
+                              controller: listScrollController,
+                            );
+                          } else {
+                            return Center(
+                              child: Text("No users"),
+                            );
+                          }
                         } else {
                           return Center(
-                            child: Text("No users"),
+                            child: CircularProgressIndicator(
+                              color: ColorConstants.themeColor,
+                            ),
                           );
                         }
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: ColorConstants.themeColor,
-                          ),
-                        );
-                      }
-                    },
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // Loading
-            Positioned(
-              child: isLoading ? LoadingView() : SizedBox.shrink(),
-            )
-          ],
+              // Loading
+              Positioned(
+                child: isLoading ? LoadingView() : SizedBox.shrink(),
+              )
+            ],
+          ),
+          onWillPop: onBackPress,
         ),
-        onWillPop: onBackPress,
       ),
     );
   }
