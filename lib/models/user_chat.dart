@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 
 class UserChat {
-  String id;
-  String photoUrl;
-  String nickname;
-  String aboutMe;
+  final String id;
+  final String photoUrl;
+  final String nickname;
+  final String aboutMe;
 
-  UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe});
+  const UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe});
 
   Map<String, String> toJson() {
     return {

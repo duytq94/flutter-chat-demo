@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/constants/app_constants.dart';
-import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/utils/utils.dart';
@@ -19,7 +17,7 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State createState() => HomePageState();
@@ -34,18 +32,19 @@ class HomePageState extends State<HomePage> {
   final ScrollController listScrollController = ScrollController();
 
   int _limit = 20;
-  int _limitIncrement = 20;
+  final int _limitIncrement = 20;
   String _textSearch = "";
   bool isLoading = false;
 
-  late AuthProvider authProvider;
-  late String currentUserId;
-  late HomeProvider homeProvider;
-  Debouncer searchDebouncer = Debouncer(milliseconds: 300);
-  StreamController<bool> btnClearController = StreamController<bool>();
-  TextEditingController searchBarTec = TextEditingController();
+  late final AuthProvider authProvider = context.read<AuthProvider>();
+  late final HomeProvider homeProvider = context.read<HomeProvider>();
+  late final String currentUserId;
 
-  List<PopupChoices> choices = <PopupChoices>[
+  final Debouncer searchDebouncer = Debouncer(milliseconds: 300);
+  final StreamController<bool> btnClearController = StreamController<bool>();
+  final TextEditingController searchBarTec = TextEditingController();
+
+  final List<PopupChoices> choices = <PopupChoices>[
     PopupChoices(title: 'Settings', icon: Icons.settings),
     PopupChoices(title: 'Log out', icon: Icons.exit_to_app),
   ];
@@ -53,9 +52,6 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    authProvider = context.read<AuthProvider>();
-    homeProvider = context.read<HomeProvider>();
-
     if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
       currentUserId = authProvider.getUserFirebaseId()!;
     } else {
@@ -98,9 +94,11 @@ class HomePageState extends State<HomePage> {
 
   void configLocalNotification() {
     AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings();
-    InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings();
+    InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -130,9 +128,11 @@ class HomePageState extends State<HomePage> {
       importance: Importance.max,
       priority: Priority.high,
     );
-    IOSNotificationDetails iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+    DarwinNotificationDetails iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
 
     print(remoteNotification);
 
@@ -263,7 +263,8 @@ class HomePageState extends State<HomePage> {
                   buildSearchBar(),
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
-                      stream: homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
+                      stream:
+                          homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.hasData) {
                           if ((snapshot.data?.docs.length ?? 0) > 0) {

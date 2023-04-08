@@ -2,13 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 
 class MessageChat {
-  String idFrom;
-  String idTo;
-  String timestamp;
-  String content;
-  int type;
+  final String idFrom;
+  final String idTo;
+  final String timestamp;
+  final String content;
+  final int type;
 
-  MessageChat({
+  const MessageChat({
     required this.idFrom,
     required this.idTo,
     required this.timestamp,

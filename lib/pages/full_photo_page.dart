@@ -6,7 +6,7 @@ import 'package:photo_view/photo_view.dart';
 class FullPhotoPage extends StatelessWidget {
   final String url;
 
-  FullPhotoPage({Key? key, required this.url}) : super(key: key);
+  const FullPhotoPage({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {

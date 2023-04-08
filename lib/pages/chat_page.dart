@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
@@ -17,7 +16,7 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 
 class ChatPage extends StatefulWidget {
-  ChatPage({Key? key, required this.arguments}) : super(key: key);
+  const ChatPage({super.key, required this.arguments});
 
   final ChatPageArguments arguments;
 
@@ -26,7 +25,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class ChatPageState extends State<ChatPage> {
-  late String currentUserId;
+  late final String currentUserId;
 
   List<QueryDocumentSnapshot> listMessage = [];
   int _limit = 20;
@@ -42,15 +41,12 @@ class ChatPageState extends State<ChatPage> {
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
 
-  late ChatProvider chatProvider;
-  late AuthProvider authProvider;
+  late final ChatProvider chatProvider = context.read<ChatProvider>();
+  late final AuthProvider authProvider = context.read<AuthProvider>();
 
   @override
   void initState() {
     super.initState();
-    chatProvider = context.read<ChatProvider>();
-    authProvider = context.read<AuthProvider>();
-
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
     readLocal();
@@ -101,9 +97,10 @@ class ChatPageState extends State<ChatPage> {
 
   Future getImage() async {
     ImagePicker imagePicker = ImagePicker();
-    PickedFile? pickedFile;
-
-    pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
+    XFile? pickedFile = await imagePicker.pickImage(source: ImageSource.gallery).catchError((err) {
+      Fluttertoast.showToast(msg: err.toString());
+      return null;
+    });
     if (pickedFile != null) {
       imageFile = File(pickedFile.path);
       if (imageFile != null) {
