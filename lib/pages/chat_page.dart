@@ -620,7 +620,6 @@ class ChatPageState extends State<ChatPage> {
                   hintStyle: TextStyle(color: ColorConstants.greyColor),
                 ),
                 focusNode: focusNode,
-                autofocus: true,
               ),
             ),
           ),
