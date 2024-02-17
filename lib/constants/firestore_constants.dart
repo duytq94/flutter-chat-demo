@@ -9,6 +9,7 @@ class FirestoreConstants {
   static const idFrom = "idFrom";
   static const idTo = "idTo";
   static const timestamp = "timestamp";
+  static const createdAt = "createdAt";
   static const content = "content";
   static const type = "type";
 }

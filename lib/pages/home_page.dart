@@ -5,16 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
+import 'package:flutter_chat_demo/models/models.dart';
+import 'package:flutter_chat_demo/pages/pages.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/utils/utils.dart';
+import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-
-import '../models/models.dart';
-import '../widgets/widgets.dart';
-import 'pages.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,103 +22,104 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  HomePageState({Key? key});
-
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  final ScrollController listScrollController = ScrollController();
+  final _firebaseMessaging = FirebaseMessaging.instance;
+  final _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final _listScrollController = ScrollController();
 
   int _limit = 20;
-  final int _limitIncrement = 20;
+  final _limitIncrement = 20;
   String _textSearch = "";
-  bool isLoading = false;
+  bool _isLoading = false;
 
-  late final AuthProvider authProvider = context.read<AuthProvider>();
-  late final HomeProvider homeProvider = context.read<HomeProvider>();
-  late final String currentUserId;
+  late final _authProvider = context.read<AuthProvider>();
+  late final _homeProvider = context.read<HomeProvider>();
+  late final String _currentUserId;
 
-  final Debouncer searchDebouncer = Debouncer(milliseconds: 300);
-  final StreamController<bool> btnClearController = StreamController<bool>();
-  final TextEditingController searchBarTec = TextEditingController();
+  final _searchDebouncer = Debouncer(milliseconds: 300);
+  final _btnClearController = StreamController<bool>();
+  final _searchBarController = TextEditingController();
 
-  final List<PopupChoices> choices = <PopupChoices>[
-    PopupChoices(title: 'Settings', icon: Icons.settings),
-    PopupChoices(title: 'Log out', icon: Icons.exit_to_app),
+  final _menus = <MenuSetting>[
+    MenuSetting(title: 'Settings', icon: Icons.settings),
+    MenuSetting(title: 'Log out', icon: Icons.exit_to_app),
   ];
 
   @override
   void initState() {
     super.initState();
-    if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
-      currentUserId = authProvider.getUserFirebaseId()!;
+    if (_authProvider.userFirebaseId?.isNotEmpty == true) {
+      _currentUserId = _authProvider.userFirebaseId!;
     } else {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false,
+        MaterialPageRoute(builder: (_) => LoginPage()),
+        (_) => false,
       );
     }
-    registerNotification();
-    configLocalNotification();
-    listScrollController.addListener(scrollListener);
+    _registerNotification();
+    _configLocalNotification();
+    _listScrollController.addListener(_scrollListener);
   }
 
   @override
   void dispose() {
+    _btnClearController.close();
+    _searchBarController.dispose();
+    _listScrollController
+      ..removeListener(_scrollListener)
+      ..dispose();
     super.dispose();
-    btnClearController.close();
   }
 
-  void registerNotification() {
-    firebaseMessaging.requestPermission();
+  void _registerNotification() {
+    _firebaseMessaging.requestPermission();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((message) {
       print('onMessage: $message');
       if (message.notification != null) {
-        showNotification(message.notification!);
+        _showNotification(message.notification!);
       }
       return;
     });
 
-    firebaseMessaging.getToken().then((token) {
+    _firebaseMessaging.getToken().then((token) {
       print('push token: $token');
       if (token != null) {
-        homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, currentUserId, {'pushToken': token});
+        _homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, _currentUserId, {'pushToken': token});
       }
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
   }
 
-  void configLocalNotification() {
-    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings();
-    InitializationSettings initializationSettings = InitializationSettings(
+  void _configLocalNotification() {
+    final initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    final initializationSettingsIOS = DarwinInitializationSettings();
+    final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  void scrollListener() {
-    if (listScrollController.offset >= listScrollController.position.maxScrollExtent &&
-        !listScrollController.position.outOfRange) {
+  void _scrollListener() {
+    if (_listScrollController.offset >= _listScrollController.position.maxScrollExtent &&
+        !_listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
       });
     }
   }
 
-  void onItemMenuPress(PopupChoices choice) {
+  void _onItemMenuPress(MenuSetting choice) {
     if (choice.title == 'Log out') {
-      handleSignOut();
+      _handleSignOut();
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsPage()));
     }
   }
 
-  void showNotification(RemoteNotification remoteNotification) async {
-    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+  void _showNotification(RemoteNotification remoteNotification) async {
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       playSound: true,
@@ -128,15 +127,15 @@ class HomePageState extends State<HomePage> {
       importance: Importance.max,
       priority: Priority.high,
     );
-    DarwinNotificationDetails iOSPlatformChannelSpecifics = DarwinNotificationDetails();
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
+    final iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+    final platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
     );
 
     print(remoteNotification);
 
-    await flutterLocalNotificationsPlugin.show(
+    await _flutterLocalNotificationsPlugin.show(
       0,
       remoteNotification.title,
       remoteNotification.body,
@@ -145,100 +144,11 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Future<bool> onBackPress() {
-    openDialog();
-    return Future.value(false);
-  }
-
-  Future<void> openDialog() async {
-    switch (await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            clipBehavior: Clip.hardEdge,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.zero,
-            children: <Widget>[
-              Container(
-                color: ColorConstants.themeColor,
-                padding: EdgeInsets.only(bottom: 10, top: 10),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Container(
-                      child: Icon(
-                        Icons.exit_to_app,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      margin: EdgeInsets.only(bottom: 10),
-                    ),
-                    Text(
-                      'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 0);
-                },
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      child: Icon(
-                        Icons.cancel,
-                        color: ColorConstants.primaryColor,
-                      ),
-                      margin: EdgeInsets.only(right: 10),
-                    ),
-                    Text(
-                      'Cancel',
-                      style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 1);
-                },
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      child: Icon(
-                        Icons.check_circle,
-                        color: ColorConstants.primaryColor,
-                      ),
-                      margin: EdgeInsets.only(right: 10),
-                    ),
-                    Text(
-                      'Yes',
-                      style: TextStyle(color: ColorConstants.primaryColor, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          );
-        })) {
-      case 0:
-        break;
-      case 1:
-        exit(0);
-    }
-  }
-
-  Future<void> handleSignOut() async {
-    authProvider.handleSignOut();
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      (Route<dynamic> route) => false,
+  Future<void> _handleSignOut() async {
+    await _authProvider.handleSignOut();
+    await Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => LoginPage()),
+      (_) => false,
     );
   }
 
@@ -251,60 +161,57 @@ class HomePageState extends State<HomePage> {
           style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
-        actions: <Widget>[buildPopupMenu()],
+        actions: [_buildPopupMenu()],
       ),
       body: SafeArea(
-        child: WillPopScope(
-          child: Stack(
-            children: <Widget>[
-              // List
-              Column(
-                children: [
-                  buildSearchBar(),
-                  Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream:
-                          homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _limit, _textSearch),
-                      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasData) {
-                          if ((snapshot.data?.docs.length ?? 0) > 0) {
-                            return ListView.builder(
-                              padding: EdgeInsets.all(10),
-                              itemBuilder: (context, index) => buildItem(context, snapshot.data?.docs[index]),
-                              itemCount: snapshot.data?.docs.length,
-                              controller: listScrollController,
-                            );
-                          } else {
-                            return Center(
-                              child: Text("No users"),
-                            );
-                          }
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _buildSearchBar(),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _homeProvider.getStreamFireStore(
+                      FirestoreConstants.pathUserCollection,
+                      _limit,
+                      _textSearch,
+                    ),
+                    builder: (_, snapshot) {
+                      if (snapshot.hasData) {
+                        if ((snapshot.data?.docs.length ?? 0) > 0) {
+                          return ListView.builder(
+                            padding: EdgeInsets.all(10),
+                            itemBuilder: (_, index) => _buildItem(snapshot.data?.docs[index]),
+                            itemCount: snapshot.data?.docs.length,
+                            controller: _listScrollController,
+                          );
                         } else {
                           return Center(
-                            child: CircularProgressIndicator(
-                              color: ColorConstants.themeColor,
-                            ),
+                            child: Text("No users"),
                           );
                         }
-                      },
-                    ),
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: ColorConstants.themeColor,
+                          ),
+                        );
+                      }
+                    },
                   ),
-                ],
-              ),
-
-              // Loading
-              Positioned(
-                child: isLoading ? LoadingView() : SizedBox.shrink(),
-              )
-            ],
-          ),
-          onWillPop: onBackPress,
+                ),
+              ],
+            ),
+            Positioned(
+              child: _isLoading ? LoadingView() : SizedBox.shrink(),
+            )
+          ],
         ),
       ),
     );
   }
 
-  Widget buildSearchBar() {
+  Widget _buildSearchBar() {
     return Container(
       height: 40,
       child: Row(
@@ -315,44 +222,47 @@ class HomePageState extends State<HomePage> {
           Expanded(
             child: TextFormField(
               textInputAction: TextInputAction.search,
-              controller: searchBarTec,
+              controller: _searchBarController,
               onChanged: (value) {
-                searchDebouncer.run(() {
-                  if (value.isNotEmpty) {
-                    btnClearController.add(true);
-                    setState(() {
-                      _textSearch = value;
-                    });
-                  } else {
-                    btnClearController.add(false);
-                    setState(() {
-                      _textSearch = "";
-                    });
-                  }
-                });
+                _searchDebouncer.run(
+                  () {
+                    if (value.isNotEmpty) {
+                      _btnClearController.add(true);
+                      setState(() {
+                        _textSearch = value;
+                      });
+                    } else {
+                      _btnClearController.add(false);
+                      setState(() {
+                        _textSearch = "";
+                      });
+                    }
+                  },
+                );
               },
               decoration: InputDecoration.collapsed(
-                hintText: 'Search nickname (you have to type exactly string)',
+                hintText: 'Search by nickname (type exactly case sensitive)',
                 hintStyle: TextStyle(fontSize: 13, color: ColorConstants.greyColor),
               ),
               style: TextStyle(fontSize: 13),
             ),
           ),
           StreamBuilder<bool>(
-              stream: btnClearController.stream,
-              builder: (context, snapshot) {
-                return snapshot.data == true
-                    ? GestureDetector(
-                        onTap: () {
-                          searchBarTec.clear();
-                          btnClearController.add(false);
-                          setState(() {
-                            _textSearch = "";
-                          });
-                        },
-                        child: Icon(Icons.clear_rounded, color: ColorConstants.greyColor, size: 20))
-                    : SizedBox.shrink();
-              }),
+            stream: _btnClearController.stream,
+            builder: (_, snapshot) {
+              return snapshot.data == true
+                  ? GestureDetector(
+                      onTap: () {
+                        _searchBarController.clear();
+                        _btnClearController.add(false);
+                        setState(() {
+                          _textSearch = "";
+                        });
+                      },
+                      child: Icon(Icons.clear_rounded, color: ColorConstants.greyColor, size: 20))
+                  : SizedBox.shrink();
+            },
+          ),
         ],
       ),
       decoration: BoxDecoration(
@@ -364,51 +274,53 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildPopupMenu() {
-    return PopupMenuButton<PopupChoices>(
-      onSelected: onItemMenuPress,
-      itemBuilder: (BuildContext context) {
-        return choices.map((PopupChoices choice) {
-          return PopupMenuItem<PopupChoices>(
-              value: choice,
-              child: Row(
-                children: <Widget>[
-                  Icon(
-                    choice.icon,
-                    color: ColorConstants.primaryColor,
-                  ),
-                  Container(
-                    width: 10,
-                  ),
-                  Text(
-                    choice.title,
-                    style: TextStyle(color: ColorConstants.primaryColor),
-                  ),
-                ],
-              ));
-        }).toList();
+  Widget _buildPopupMenu() {
+    return PopupMenuButton<MenuSetting>(
+      onSelected: _onItemMenuPress,
+      itemBuilder: (_) {
+        return _menus.map(
+          (choice) {
+            return PopupMenuItem<MenuSetting>(
+                value: choice,
+                child: Row(
+                  children: [
+                    Icon(
+                      choice.icon,
+                      color: ColorConstants.primaryColor,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      choice.title,
+                      style: TextStyle(color: ColorConstants.primaryColor),
+                    ),
+                  ],
+                ));
+          },
+        ).toList();
       },
     );
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot? document) {
+  Widget _buildItem(DocumentSnapshot? document) {
     if (document != null) {
-      UserChat userChat = UserChat.fromDocument(document);
-      if (userChat.id == currentUserId) {
+      final userChat = UserChat.fromDocument(document);
+      if (userChat.id == _currentUserId) {
         return SizedBox.shrink();
       } else {
         return Container(
           child: TextButton(
             child: Row(
-              children: <Widget>[
-                Material(
+              children: [
+                ClipOval(
                   child: userChat.photoUrl.isNotEmpty
                       ? Image.network(
                           userChat.photoUrl,
                           fit: BoxFit.cover,
                           width: 50,
                           height: 50,
-                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          loadingBuilder: (_, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
                               width: 50,
@@ -436,13 +348,11 @@ class HomePageState extends State<HomePage> {
                           size: 50,
                           color: ColorConstants.greyColor,
                         ),
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
-                  clipBehavior: Clip.hardEdge,
                 ),
                 Flexible(
                   child: Container(
                     child: Column(
-                      children: <Widget>[
+                      children: [
                         Container(
                           child: Text(
                             'Nickname: ${userChat.nickname}',
@@ -469,13 +379,13 @@ class HomePageState extends State<HomePage> {
               ],
             ),
             onPressed: () {
-              if (Utilities.isKeyboardShowing()) {
-                Utilities.closeKeyboard(context);
+              if (Utilities.isKeyboardShowing(context)) {
+                Utilities.closeKeyboard();
               }
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatPage(
+                  builder: (_) => ChatPage(
                     arguments: ChatPageArguments(
                       peerId: userChat.id,
                       peerAvatar: userChat.photoUrl,

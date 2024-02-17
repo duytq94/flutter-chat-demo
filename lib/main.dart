@@ -21,10 +21,11 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final SharedPreferences prefs;
-  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-  final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
 
   MyApp({required this.prefs});
+
+  final _firebaseFirestore = FirebaseFirestore.instance;
+  final _firebaseStorage = FirebaseStorage.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -35,34 +36,34 @@ class MyApp extends StatelessWidget {
             firebaseAuth: FirebaseAuth.instance,
             googleSignIn: GoogleSignIn(),
             prefs: this.prefs,
-            firebaseFirestore: this.firebaseFirestore,
+            firebaseFirestore: this._firebaseFirestore,
           ),
         ),
         Provider<SettingProvider>(
           create: (_) => SettingProvider(
             prefs: this.prefs,
-            firebaseFirestore: this.firebaseFirestore,
-            firebaseStorage: this.firebaseStorage,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
           ),
         ),
         Provider<HomeProvider>(
           create: (_) => HomeProvider(
-            firebaseFirestore: this.firebaseFirestore,
+            firebaseFirestore: this._firebaseFirestore,
           ),
         ),
         Provider<ChatProvider>(
           create: (_) => ChatProvider(
             prefs: this.prefs,
-            firebaseFirestore: this.firebaseFirestore,
-            firebaseStorage: this.firebaseStorage,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
           ),
         ),
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,
         theme: ThemeData(
-          primaryColor: ColorConstants.themeColor,
-          primarySwatch: MaterialColor(0xfff5a623, ColorConstants.swatchColor),
+          useMaterial3: true,
+          colorSchemeSeed: ColorConstants.themeColor,
         ),
         home: SplashPage(),
         debugShowCheckedModeBanner: false,

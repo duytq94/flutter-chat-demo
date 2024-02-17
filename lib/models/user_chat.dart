@@ -23,13 +23,13 @@ class UserChat {
     String nickname = "";
     try {
       aboutMe = doc.get(FirestoreConstants.aboutMe);
-    } catch (e) {}
+    } catch (_) {}
     try {
       photoUrl = doc.get(FirestoreConstants.photoUrl);
-    } catch (e) {}
+    } catch (_) {}
     try {
       nickname = doc.get(FirestoreConstants.nickname);
-    } catch (e) {}
+    } catch (_) {}
     return UserChat(
       id: doc.id,
       photoUrl: photoUrl,

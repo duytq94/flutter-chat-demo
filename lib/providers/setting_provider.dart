@@ -24,8 +24,8 @@ class SettingProvider {
   }
 
   UploadTask uploadFile(File image, String fileName) {
-    Reference reference = firebaseStorage.ref().child(fileName);
-    UploadTask uploadTask = reference.putFile(image);
+    final reference = firebaseStorage.ref().child(fileName);
+    final uploadTask = reference.putFile(image);
     return uploadTask;
   }
 

@@ -19,7 +19,7 @@
 * Run `flutter pub get`
 * Run `flutter run` (remember open simulator or connect physical device, iOS auto run additional command `pod install`)
 
-## Big update
+## Major update
 * Aug, 27th, 2022 - Upgrade dependencies and fix to working fine with Flutter 3
 * Jun, 4th, 2021 - Migrating to Flutter 2 and using Dart sound null safety
 * Oct, 2nd, 2021 - Apply provider & restructure

@@ -13,10 +13,6 @@ class ChatProvider {
 
   ChatProvider({required this.firebaseFirestore, required this.prefs, required this.firebaseStorage});
 
-  String? getPref(String key) {
-    return prefs.getString(key);
-  }
-
   UploadTask uploadFile(File image, String fileName) {
     Reference reference = firebaseStorage.ref().child(fileName);
     UploadTask uploadTask = reference.putFile(image);
@@ -38,13 +34,13 @@ class ChatProvider {
   }
 
   void sendMessage(String content, int type, String groupChatId, String currentUserId, String peerId) {
-    DocumentReference documentReference = firebaseFirestore
+    final documentReference = firebaseFirestore
         .collection(FirestoreConstants.pathMessageCollection)
         .doc(groupChatId)
         .collection(groupChatId)
         .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
-    MessageChat messageChat = MessageChat(
+    final messageChat = MessageChat(
       idFrom: currentUserId,
       idTo: peerId,
       timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -61,8 +57,3 @@ class ChatProvider {
   }
 }
 
-class TypeMessage {
-  static const text = 0;
-  static const image = 1;
-  static const sticker = 2;
-}

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/pages/pages.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-
-import 'pages.dart';
 
 class SplashPage extends StatefulWidget {
   SplashPage({super.key});
@@ -17,25 +16,25 @@ class SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     Future.delayed(Duration(seconds: 1), () {
-      // just delay for showing this slash page clearer because it too fast
-      checkSignedIn();
+      // just delay for showing this slash page clearer because it's too fast
+      _checkSignedIn();
     });
   }
 
-  void checkSignedIn() async {
-    AuthProvider authProvider = context.read<AuthProvider>();
+  void _checkSignedIn() async {
+    final authProvider = context.read<AuthProvider>();
     bool isLoggedIn = await authProvider.isLoggedIn();
     if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
-      return;
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     }
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-    );
   }
 
   @override

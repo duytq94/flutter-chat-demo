@@ -9,19 +9,19 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.9.0
-  firebase_auth: ^4.4.0
-  google_sign_in: ^6.1.0
-  cloud_firestore: ^4.5.0
+  firebase_core: ^2.25.4
+  firebase_auth: ^4.17.4
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^4.15.4
   fluttertoast: ^8.2.1
-  image_picker: ^1.0.4
-  shared_preferences: ^2.1.0
-  firebase_storage: ^11.1.0
-  firebase_messaging: ^14.4.0
-  flutter_local_notifications: ^16.1.0
-  photo_view: 0.14.0
+  image_picker: ^1.0.7
+  shared_preferences: ^2.2.2
+  firebase_storage: ^11.6.5
+  firebase_messaging: ^14.7.15
+  flutter_local_notifications: ^16.3.2
+  photo_view: ^0.14.0
   provider: ^6.0.1
-  intl: ^0.18.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
