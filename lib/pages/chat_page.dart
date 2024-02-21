@@ -564,12 +564,16 @@ class ChatPageState extends State<ChatPage> {
                 if (snapshot.hasData) {
                   _listMessage = snapshot.data!.docs;
                   if (_listMessage.length > 0) {
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10),
-                      itemBuilder: (_, index) => _buildItemMessage(index, snapshot.data?.docs[index]),
-                      itemCount: snapshot.data?.docs.length,
-                      reverse: true,
-                      controller: _listScrollController,
+                    return Align(
+                      alignment: Alignment.topCenter,
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(10),
+                        itemBuilder: (_, index) => _buildItemMessage(index, snapshot.data?.docs[index]),
+                        itemCount: snapshot.data?.docs.length,
+                        shrinkWrap: true,
+                        reverse: true,
+                        controller: _listScrollController,
+                      ),
                     );
                   } else {
                     return Center(child: Text("No message here yet..."));
