@@ -120,7 +120,17 @@ class ChatPageState extends State<ChatPage> {
     }
   }
 
+// get sticker for chat
   void _getSticker() {
+    // Hide keyboard when sticker appear
+    _focusNode.unfocus();
+    setState(() {
+      _isShowSticker = !_isShowSticker;
+    });
+  }
+
+  // send voice msg for chat
+  void _sendVoiceMsg() {
     // Hide keyboard when sticker appear
     _focusNode.unfocus();
     setState(() {
@@ -510,6 +520,18 @@ class ChatPageState extends State<ChatPage> {
               child: IconButton(
                 icon: Icon(Icons.face),
                 onPressed: _getSticker,
+                color: ColorConstants.primaryColor,
+              ),
+            ),
+            color: Colors.white,
+          ),
+          // voice msg widget
+          Material(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 1),
+              child: IconButton(
+                icon: Icon(Icons.mic),
+                onPressed: _sendVoiceMsg,
                 color: ColorConstants.primaryColor,
               ),
             ),
