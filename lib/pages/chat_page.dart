@@ -34,6 +34,9 @@ class ChatPageState extends State<ChatPage> {
   bool _isLoading = false;
   bool _isShowSticker = false;
   String _imageUrl = "";
+  bool isatthFileIconVisble = true;
+  bool iscurrencyIconVisble = true;
+  bool istyping = false;
 
   final _chatInputController = TextEditingController();
   final _listScrollController = ScrollController();
@@ -47,6 +50,14 @@ class ChatPageState extends State<ChatPage> {
     super.initState();
     _focusNode.addListener(_onFocusChange);
     _listScrollController.addListener(_scrollListener);
+
+    _chatInputController.addListener((){
+      setState(() {
+        istyping = _chatInputController.text.isNotEmpty;
+        iscurrencyIconVisble = _chatInputController.text.isEmpty;
+        isatthFileIconVisble = _chatInputController.text.isEmpty;
+      });
+    });
     _readLocal();
   }
 
@@ -56,6 +67,8 @@ class ChatPageState extends State<ChatPage> {
     _listScrollController
       ..removeListener(_scrollListener)
       ..dispose();
+      _focusNode.dispose();
+
     super.dispose();
   }
 
@@ -160,6 +173,8 @@ class ChatPageState extends State<ChatPage> {
     if (content.trim().isNotEmpty) {
       _chatInputController.clear();
       _chatProvider.sendMessage(content, type, _groupChatId, _currentUserId, widget.arguments.peerId);
+                              // FocusScope.of(context).requestFocus(_focusNode);
+
       if (_listScrollController.hasClients) {
         _listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       }
@@ -410,6 +425,7 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 236, 231, 214),
       appBar: AppBar(
         title: Text(
           this.widget.arguments.peerNickname,
@@ -501,54 +517,75 @@ class ChatPageState extends State<ChatPage> {
           // button send image
           Material(
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1),
-              child: IconButton(
-                icon: Icon(Icons.image),
-                onPressed: () {
-                  _pickImage().then((isSuccess) {
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              child:   InkWell(
+                onTap: (){
+                 _pickImage().then((isSuccess) {
                     if (isSuccess) _uploadFile();
                   });
                 },
-                color: ColorConstants.primaryColor,
-              ),
+                child: Icon(Icons.image,color: ColorConstants.primaryColor,),
+                
+                ),
+            
             ),
             color: Colors.white,
           ),
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1),
-              child: IconButton(
-                icon: Icon(Icons.face),
-                onPressed: _getSticker,
-                color: ColorConstants.primaryColor,
+           Visibility(
+            visible: iscurrencyIconVisble,
+             child: Material(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 5),
+                child: InkWell(
+                  onTap: (){
+                    // gpay impllement
+                  },
+                  child: Icon(Icons.currency_rupee,color: ColorConstants.primaryColor,),
+                  
+                  ),
               ),
-            ),
-            color: Colors.white,
-          ),
-          // voice msg widget
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1),
-              child: IconButton(
-                icon: Icon(Icons.mic),
-                onPressed: _sendVoiceMsg,
-                color: ColorConstants.primaryColor,
+              color: Colors.white,
+                       ),
+           ),
+          Visibility(
+            visible: isatthFileIconVisble,
+            child: Material(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 5),
+                child: InkWell(
+                  onTap: (){
+                    _getSticker();
+                  },
+                  child: Icon(Icons.face,color: ColorConstants.primaryColor,),
+                  
+                  ),
+               
               ),
+              color: Colors.white,
             ),
-            color: Colors.white,
           ),
+         
 
           // chat input
           Flexible(
             child: Container(
               child: TextField(
                 onSubmitted: (_) {
+                 
+                 
+                   if (!_focusNode.hasFocus && _chatInputController.text.isEmpty) {
+                        FocusScope.of(context).requestFocus(_focusNode);
+                      }
+                      setState(() {
+                        iscurrencyIconVisble = false;
+                        isatthFileIconVisble = false;
+                      });
                   _onSendMessage(_chatInputController.text, TypeMessage.text);
                 },
                 style: TextStyle(color: ColorConstants.primaryColor, fontSize: 15),
                 controller: _chatInputController,
                 decoration: InputDecoration.collapsed(
-                  hintText: 'Type your message...',
+                  hintText: 'Message',
                   hintStyle: TextStyle(color: ColorConstants.greyColor),
                 ),
                 focusNode: _focusNode,
@@ -561,8 +598,11 @@ class ChatPageState extends State<ChatPage> {
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 8),
               child: IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => _onSendMessage(_chatInputController.text, TypeMessage.text),
+                icon: Icon(istyping?   Icons.send:Icons.mic,),
+                onPressed: () {
+                  _onSendMessage(_chatInputController.text, TypeMessage.text);
+
+                } ,
                 color: ColorConstants.primaryColor,
               ),
             ),
