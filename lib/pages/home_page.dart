@@ -60,16 +60,6 @@ class HomePageState extends State<HomePage> {
     _listScrollController.addListener(_scrollListener);
   }
 
-  @override
-  void dispose() {
-    _btnClearController.close();
-    _searchBarController.dispose();
-    _listScrollController
-      ..removeListener(_scrollListener)
-      ..dispose();
-    super.dispose();
-  }
-
   void _registerNotification() {
     _firebaseMessaging.requestPermission();
 
@@ -223,6 +213,9 @@ class HomePageState extends State<HomePage> {
             child: TextFormField(
               textInputAction: TextInputAction.search,
               controller: _searchBarController,
+              onTapOutside: (_) {
+                Utilities.closeKeyboard();
+              },
               onChanged: (value) {
                 _searchDebouncer.run(
                   () {
@@ -396,8 +389,8 @@ class HomePageState extends State<HomePage> {
               );
             },
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
-              shape: MaterialStateProperty.all<OutlinedBorder>(
+              backgroundColor: WidgetStateProperty.all<Color>(ColorConstants.greyColor2),
+              shape: WidgetStateProperty.all<OutlinedBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
@@ -410,5 +403,15 @@ class HomePageState extends State<HomePage> {
     } else {
       return SizedBox.shrink();
     }
+  }
+
+  @override
+  void dispose() {
+    _btnClearController.close();
+    _searchBarController.dispose();
+    _listScrollController
+      ..removeListener(_scrollListener)
+      ..dispose();
+    super.dispose();
   }
 }

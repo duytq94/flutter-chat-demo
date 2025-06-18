@@ -7,14 +7,7 @@ import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  LoginPageState createState() => LoginPageState();
-}
-
-class LoginPageState extends State<LoginPage> {
+class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -63,14 +56,14 @@ class LoginPageState extends State<LoginPage> {
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed)) return Color(0xffdd4b39).withOpacity(0.8);
+                backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.pressed)) return Color(0xffdd4b39).withValues(alpha: 0.8);
                     return Color(0xffdd4b39);
                   },
                 ),
                 splashFactory: NoSplash.splashFactory,
-                padding: MaterialStateProperty.all<EdgeInsets>(
+                padding: WidgetStateProperty.all<EdgeInsets>(
                   EdgeInsets.fromLTRB(30, 15, 30, 15),
                 ),
               ),

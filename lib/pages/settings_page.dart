@@ -291,8 +291,8 @@ class SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.primaryColor),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
+                      backgroundColor: WidgetStateProperty.all<Color>(ColorConstants.primaryColor),
+                      padding: WidgetStateProperty.all<EdgeInsets>(
                         EdgeInsets.fromLTRB(30, 10, 30, 10),
                       ),
                     ),
@@ -309,5 +309,14 @@ class SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controllerNickname.dispose();
+    _controllerAboutMe.dispose();
+    _focusNodeNickname.dispose();
+    _focusNodeAboutMe.dispose();
+    super.dispose();
   }
 }

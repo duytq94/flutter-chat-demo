@@ -7,6 +7,7 @@ import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:flutter_chat_demo/pages/pages.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
+import 'package:flutter_chat_demo/utils/utilities.dart';
 import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,15 +49,6 @@ class ChatPageState extends State<ChatPage> {
     _focusNode.addListener(_onFocusChange);
     _listScrollController.addListener(_scrollListener);
     _readLocal();
-  }
-
-  @override
-  void dispose() {
-    _chatInputController.dispose();
-    _listScrollController
-      ..removeListener(_scrollListener)
-      ..dispose();
-    super.dispose();
   }
 
   void _scrollListener() {
@@ -424,7 +416,7 @@ class ChatPageState extends State<ChatPage> {
             ],
           ),
           canPop: false,
-          onPopInvoked: (didPop) {
+          onPopInvokedWithResult: (didPop, result) {
             if (didPop) return;
             _onBackPress();
           },
@@ -520,6 +512,9 @@ class ChatPageState extends State<ChatPage> {
           Flexible(
             child: Container(
               child: TextField(
+                onTapOutside: (_) {
+                  Utilities.closeKeyboard();
+                },
                 onSubmitted: (_) {
                   _onSendMessage(_chatInputController.text, TypeMessage.text);
                 },
@@ -589,6 +584,16 @@ class ChatPageState extends State<ChatPage> {
               ),
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    _chatInputController.dispose();
+    _listScrollController
+      ..removeListener(_scrollListener)
+      ..dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 }
 
